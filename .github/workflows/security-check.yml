@@ -40,8 +40,8 @@ jobs:
           npm install --silent --no-audit --no-fund jsdom
           node runtime-check.js LocalPictureGallery.html
 
-      - name: Repository contains the tool only (no images committed)
+      - name: Repository contains the tool only (no images committed, app icons excepted)
         run: |
-          imgs=$(git ls-files | grep -iE '\.(jpe?g|png|gif|webp|bmp|avif|heic|heif|tiff?)$' || true)
+          imgs=$(git ls-files | grep -v '^icons/icon-[0-9]*\.png$' | grep -iE '\.(jpe?g|png|gif|webp|bmp|avif|heic|heif|tiff?)$' || true)
           if [ -n "$imgs" ]; then echo "image files are committed:"; echo "$imgs"; exit 1; fi
           echo "no image files in repository"

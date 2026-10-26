@@ -11,6 +11,10 @@
 *.tif
 *.tiff
 
+# האייקונים של האפליקציה הם חלק מהכלי – מותרים
+!icons/
+!icons/icon-*.png
+
 # קבצי מערכת
 Thumbs.db
 .DS_Store

@@ -21,7 +21,7 @@ echo "Checking $FILE"
 [ -f "$FILE" ] || { echo "FAIL  file not found"; exit 1; }
 
 check "no http(s):// URLs"                      'https?://'
-check "no external scripts / stylesheets"       '<(script|link)[^>]*\b(src|href)='
+check "no external scripts / stylesheets"       '<script[^>]*\bsrc=|<link[^>]*rel="(stylesheet|preload|prefetch|modulepreload)"|<link[^>]*href="(https?:)?//'
 check "no iframes / embeds / objects"           '<(iframe|embed|object)\b'
 check "no fetch / XHR / WebSocket / beacon"     '\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|EventSource)\b'
 check "no dynamic code (eval / Function)"       '\beval\s*\(|\bnew\s+Function\s*\('
@@ -32,6 +32,10 @@ check "no service worker / push"                '\b(serviceWorker|PushManager)\b
 
 # Every image source must be a blob: URL (browser memory), never an external address
 srcs=$(grep -oE '\.src\s*=\s*[^;]+' "$FILE" | grep -vE 'it\.url' || true)
+# static <img src> / <link href> must be inline data: URIs or a relative icons/ path – never an address
+ext=$(grep -oE '<(img|link)[^>]*\b(src|href)="[^"]*"' "$FILE" | grep -oE '(src|href)="[^"]*"' | grep -vE '="(data:image/png;base64,[A-Za-z0-9+/=]+|icons/icon-[0-9]+\.png)"' || true)
+if [ -n "$ext" ]; then echo "FAIL  img/link sources must be inline data: or icons/ only"; echo "$ext" | sed 's/^/      /'; fail=1
+else echo "PASS  img/link sources are inline or icons/ only"; fi
 if [ -n "$srcs" ]; then echo "FAIL  img.src assignments must use blob URLs only"; echo "$srcs" | sed 's/^/      /'; fail=1
 else echo "PASS  image sources are blob: URLs only"; fi
 

@@ -1,3 +1,5 @@
+<img src="icons/icon-128.png" width="96" align="right" alt="">
+
 # LocalPictureGallery
 
 <a name="he"></a>עברית · [English](#english)
@@ -32,7 +34,7 @@
    תתי־תיקיות נסרקות גם כן. הדפדפן לא מאפשר לבחור שורש כונן או תיקיית מערכת.
 3. התמונות מוצגות ברשת, 100 בכל פעם; גלילה לתחתית טוענת עוד.
 4. **סינון** – מקלידים בתיבת החיפוש. שם שמוקלד בעברית מוצא גם קבצים באנגלית ולהפך (`יוסי` ↔ `yossi`, `rivka` ↔ `רבקה`): התאמה פונטית של שמות, לא תרגום.
-5. **חיפוש קולי** – 🎤 בתיבת החיפוש; מופיע רק כשהדפדפן מזהה דיבור במכשיר עצמו (ראה אבטחה).
+5. **חיפוש קולי** – 🎤 בתיבת החיפוש; מופיע רק כשהדפדפן מזהה דיבור במכשיר עצמו (ראה אבטחה). מספרים שנאמרים בעברית או בערבית הופכים לספרות ("ארבעים ושתיים" ← 42, "خمسة وعشرين" ← 25).
 6. **תצוגה מוגדלת** – לחיצה על תמונה. ניווט: חיצים, מקשי ← →, החלקה. סגירה: ✕, Esc, או לחיצה על הרקע.
 7. **שינוי שם** – בתצוגה המוגדלת, שורת **File name** ← שם חדש ← **Save**. הסיומת קבועה. השינוי נעשה בדיסק מיד.
 8. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית). הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
@@ -86,6 +88,8 @@ MIT – ראה [LICENSE](LICENSE). מותר להשתמש, להעתיק ולשנ�
 
 <a name="english"></a>
 
+<img src="icons/icon-128.png" width="96" align="right" alt="">
+
 # LocalPictureGallery
 
 [עברית](#he) · English
@@ -120,7 +124,7 @@ Renaming and voice search rely on capabilities that currently exist only in Chro
    Subfolders are scanned too. The browser does not allow a drive root or a system folder.
 3. Images appear in a grid, 100 at a time; scrolling to the bottom loads more.
 4. **Filter** – type in the search box. A name typed in Hebrew also finds files named in English and vice versa (`יוסי` ↔ `yossi`, `rivka` ↔ `רבקה`): phonetic name matching, not translation.
-5. **Voice search** – 🎤 in the search box; shown only when the browser recognises speech on the device itself (see Security).
+5. **Voice search** – 🎤 in the search box; shown only when the browser recognises speech on the device itself (see Security). Numbers spoken in Hebrew or Arabic become digits ("ארבעים ושתיים" → 42, "خمسة وعشرين" → 25).
 6. **Full-size view** – click an image. Navigate: arrows, ← → keys, swipe. Close: ✕, Esc, or click the background.
 7. **Rename** – in the full-size view, the **File name** row → new name → **Save**. The extension is fixed. The change is written to disk immediately.
 8. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English). The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
