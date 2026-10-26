@@ -1,32 +1,67 @@
 <!doctype html>
-<!-- LocalPictureGallery v1.0.0 -->
+<!-- LocalPictureGallery v1.1.0 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="application-name" content="LocalPictureGallery">
-<meta name="version" content="1.0.0">
+<meta name="version" content="1.1.0">
 <title>LocalPictureGallery</title>
 <style>
   :root { --bg:#111; --fg:#eee; --muted:#999; --card:#1c1c1c; --accent:#4c8bf5; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--fg); }
-  header { position:sticky; top:0; z-index:5; background:rgba(17,17,17,.95); backdrop-filter:blur(6px);
-           padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #222; }
-  header h1 { font-size:18px; margin:0; margin-inline-end:8px; }
+
+  /* ---------- header: brand row + toolbar row ---------- */
+  header { position:sticky; top:0; z-index:5; background:rgba(17,17,17,.95); backdrop-filter:blur(6px); border-bottom:1px solid #222; }
+  .brand { position:relative; display:flex; align-items:center; justify-content:center; padding:18px 16px 12px; }
+  .brand h1 { margin:0; font-size:28px; letter-spacing:.5px; }
+  #ver { position:absolute; bottom:6px; right:16px; color:var(--muted); font-size:11px; direction:ltr; }
+  /* language picker always top-left, version always bottom-right – in both text directions */
+  .brand .langwrap { position:absolute; top:50%; transform:translateY(-50%); left:16px; direction:ltr; }
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:0 16px 12px; }
+  @media (max-width:600px) {
+    .brand { padding:14px 16px 22px; }
+    .brand h1 { font-size:20px; margin-inline-start:110px; margin-inline-end:0; text-align:center; }
+    html[dir=rtl] .brand h1 { margin-inline-start:0; margin-inline-end:110px; }
+    .brand .langwrap { top:14px; transform:none; }
+    #langBtn { padding:5px 8px; font-size:12px; }
+  }
+
   .btn { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; font-size:14px; cursor:pointer; }
   .btn.secondary { background:#333; }
   .btn:disabled { opacity:.5; cursor:default; }
   input[type=file] { display:none; }
-  #search { flex:1; min-width:160px; padding:8px 12px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:var(--fg); font-size:14px; }
+
+  /* ---------- language picker with flags ---------- */
+  .langwrap { position:relative; }
+  #langBtn { display:flex; align-items:center; gap:8px; background:#1a1a1a; color:var(--fg); border:1px solid #333; border-radius:8px; padding:6px 10px; font-size:13px; cursor:pointer; }
+  #langBtn .flag, #langMenu .flag { width:22px; height:15px; border-radius:2px; display:block; flex:none; }
+  #langMenu { position:absolute; top:calc(100% + 6px); left:0; min-width:170px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:6px; z-index:20; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+  html[dir=rtl] #langMenu { left:auto; right:0; }
+  #langMenu button { display:flex; align-items:center; gap:10px; width:100%; background:none; border:0; color:var(--fg); padding:8px 10px; border-radius:6px; font-size:14px; cursor:pointer; text-align:start; }
+  #langMenu button:hover, #langMenu button:focus { background:#2a2a2a; outline:0; }
+  #langMenu button[aria-checked=true] { background:#243b66; }
+  #langMenu button .native { flex:1; }
+  #langMenu button .code { color:var(--muted); font-size:11px; direction:ltr; }
+
+  /* ---------- search with mic ---------- */
+  .searchwrap { flex:1; min-width:200px; position:relative; display:flex; align-items:center; }
+  #search { width:100%; padding:8px 40px 8px 12px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:var(--fg); font-size:14px; }
+  html[dir=rtl] #search { padding:8px 12px 8px 40px; }
+  #mic { position:absolute; right:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; border:0; border-radius:6px; background:transparent; color:var(--muted); cursor:pointer; font-size:16px; line-height:1; }
+  html[dir=rtl] #mic { right:auto; left:4px; }
+  #mic:hover { background:#2a2a2a; color:var(--fg); }
+  #mic.listening { color:#fff; background:#c0392b; animation:pulse 1s infinite; }
+  #mic.hidden { display:none; }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(192,57,43,.6); } 50% { box-shadow:0 0 0 6px rgba(192,57,43,0); } }
+  #micMsg { color:var(--muted); font-size:12px; min-height:1em; }
   #count { color:var(--muted); font-size:13px; }
-  #ver { color:var(--muted); font-size:11px; direction:ltr; }
-  #lang { background:#1a1a1a; color:var(--fg); border:1px solid #333; border-radius:8px; padding:7px 8px; font-size:13px; }
+
   main { padding:16px; }
   #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
   .card { background:var(--card); border-radius:10px; overflow:hidden; cursor:pointer; }
   .card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#000; }
-  /* שמות קבצים תמיד LTR; היישור עוקב אחרי כיוון הממשק */
   .card .name { padding:6px 8px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; text-align:left; }
   html[dir=rtl] .card .name { text-align:right; }
   #empty { color:var(--muted); text-align:center; padding:60px 20px; line-height:1.6; }
@@ -37,7 +72,7 @@
   #lb .bar { display:flex; align-items:center; gap:10px; padding:10px 16px; color:var(--muted); font-size:13px; flex-wrap:wrap; }
   #lb .bar .name { flex:1; direction:ltr; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--fg); }
   html[dir=rtl] #lb .bar .name { text-align:right; }
-  /* שורת שינוי השם קבועה: אנגלית, LTR, מוצמדת לשמאל – בכל שפת ממשק */
+  /* rename row: always English, LTR, left-aligned */
   #renameBar { border-top:1px solid #222; direction:ltr; justify-content:flex-start; text-align:left; }
   #renameWrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; direction:ltr; }
   #newName { padding:6px 10px; border-radius:8px; border:1px solid #444; background:#1a1a1a; color:var(--fg); font-size:14px; min-width:240px; direction:ltr; text-align:left; }
@@ -54,13 +89,25 @@
 </head>
 <body>
 <header>
-  <h1 data-i18n="title"></h1><span id="ver"></span>
-  <button class="btn" id="pickDir" data-i18n="pickDir"></button>
-  <label class="btn secondary"><span data-i18n="pickFiles"></span><input type="file" id="files" accept="image/*" multiple></label>
-  <input type="file" id="dirInput" webkitdirectory multiple>
-  <input id="search" type="search" data-i18n-placeholder="search">
-  <span id="count"></span>
-  <select id="lang" title="Language"></select>
+  <div class="brand">
+    <div class="langwrap">
+      <button id="langBtn" aria-haspopup="listbox" aria-expanded="false"><span class="flag" id="langFlag"></span><span id="langName"></span><span>▾</span></button>
+      <div id="langMenu" class="hidden" role="listbox"></div>
+    </div>
+    <h1 data-i18n="title"></h1>
+    <span id="ver"></span>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="pickDir" data-i18n="pickDir"></button>
+    <label class="btn secondary"><span data-i18n="pickFiles"></span><input type="file" id="files" accept="image/*" multiple></label>
+    <input type="file" id="dirInput" webkitdirectory multiple>
+    <div class="searchwrap">
+      <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off">
+      <button id="mic" class="hidden" data-i18n-title="micTitle">🎤</button>
+    </div>
+    <span id="count"></span>
+    <span id="micMsg"></span>
+  </div>
 </header>
 <main>
   <div id="grid"></div>
@@ -92,21 +139,31 @@
 
 <script>
 (() => {
-  const VERSION = '1.0.0';   // לעדכן יחד עם התג ב-Git (ראה README, סעיף 7)
-  // ===================== שפות =====================
-  // ברירת מחדל: שפת המכשיר/הדפדפן. עברית → עברית, כל השאר → אנגלית (אלא אם השפה קיימת כאן).
-  // להוספת שפה: להעתיק בלוק שלם, לתת לו קוד ISO של שתי אותיות (fr, ru, es...) ולתרגם את המחרוזות.
-  // dir: 'rtl' לשפות שנכתבות מימין לשמאל, אחרת 'ltr'. {n} ו-{m} מוחלפים במספרים.
+  const VERSION = '1.1.0';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
+
+  // ===================== Languages =====================
+  // Default = device/browser language. Hebrew → Hebrew, anything else → English unless that language exists here.
+  // To add a language: copy a whole block, give it a two-letter ISO code (fr, ru, es…), translate the strings.
+  // dir: 'rtl' for right-to-left languages. flag: an inline SVG (no external images – the file stays self-contained).
+  // speech: the BCP-47 tag used for voice search in that language.
+  const FLAGS = {
+    il: '<svg viewBox="0 0 22 16"><rect width="22" height="16" fill="#fff"/><rect y="2" width="22" height="2.4" fill="#0038b8"/><rect y="11.6" width="22" height="2.4" fill="#0038b8"/><path d="M11 4.2l3.3 5.7H7.7z M11 11.8L7.7 6.1h6.6z" fill="none" stroke="#0038b8" stroke-width="1"/></svg>',
+    gb: '<svg viewBox="0 0 60 30"><clipPath id="t"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></svg>'
+  };
   const T = {
     he: {
-      name: 'עברית', dir: 'rtl',
+      name: 'עברית', dir: 'rtl', flag: 'il', speech: 'he-IL',
       title: 'LocalPictureGallery',
       pickDir: 'בחר תיקייה', pickFiles: 'בחר קבצים',
-      search: 'סינון לפי שם קובץ…',
+      search: 'סינון לפי שם קובץ – בעברית או באנגלית…',
       empty1: 'בחר תיקייה או קבצים כדי להציג תמונות.',
       empty2: 'הכול נשאר במכשיר שלך – שום דבר לא נשלח לשום מקום.',
       close: 'סגור ✕', prev: 'הקודמת', next: 'הבאה',
       more: 'מוצגות {n} מתוך {m} – גלול להמשך',
+      micTitle: 'חיפוש קולי (זיהוי דיבור במכשיר בלבד)',
+      micListening: 'מאזין…', micDenied: 'אין הרשאה למיקרופון',
+      micDownload: 'מוריד חבילת זיהוי דיבור לשפה זו למכשיר…', micNone: 'לא זוהה דיבור',
+      micUnavailable: 'זיהוי דיבור במכשיר לא זמין לשפה זו בדפדפן הזה',
       msgEmpty: 'השם ריק',
       msgInvalid: 'השם מכיל תווים לא חוקיים: \\ / : * ? " < > |',
       msgSame: 'זה כבר השם הנוכחי',
@@ -115,14 +172,18 @@
       msgDone: 'השם שונה ✓', msgFail: 'שינוי השם נכשל'
     },
     en: {
-      name: 'English', dir: 'ltr',
+      name: 'English', dir: 'ltr', flag: 'gb', speech: 'en-US',
       title: 'LocalPictureGallery',
       pickDir: 'Choose folder', pickFiles: 'Choose files',
-      search: 'Filter by file name…',
+      search: 'Filter by file name – English or Hebrew…',
       empty1: 'Choose a folder or files to display images.',
       empty2: 'Everything stays on your device – nothing is sent anywhere.',
       close: 'Close ✕', prev: 'Previous', next: 'Next',
       more: 'Showing {n} of {m} – scroll for more',
+      micTitle: 'Voice search (on-device speech recognition only)',
+      micListening: 'Listening…', micDenied: 'Microphone permission denied',
+      micDownload: 'Downloading the on-device speech pack for this language…', micNone: 'No speech detected',
+      micUnavailable: 'On-device speech recognition is not available for this language in this browser',
       msgEmpty: 'Name is empty',
       msgInvalid: 'Name contains invalid characters: \\ / : * ? " < > |',
       msgSame: 'That is already the current name',
@@ -136,7 +197,7 @@
   const t = (k, v = {}) => (T[lang][k] ?? T[FALLBACK][k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
 
   function detectLang() {
-    // #lang=xx בכתובת גובר (לקישור/סימנייה בשפה קבועה); אחרת שפת המכשיר/הדפדפן
+    // #lang=xx in the address wins (for a link/bookmark in a fixed language); otherwise the device/browser language
     const fromHash = (location.hash.match(/lang=([A-Za-z-]+)/) || [])[1];
     const cands = [fromHash, ...(navigator.languages || []), navigator.language]
       .filter(Boolean).map(l => l.toLowerCase().split('-')[0]);
@@ -151,52 +212,151 @@
     document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
     document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
-    langSel.value = lang;
+    langFlag.innerHTML = FLAGS[T[lang].flag] || '';
+    langName.textContent = T[lang].name;
+    langMenu.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', b.dataset.code === lang));
     updateStatus();
+    setupMic();
   }
 
-  // ===================== אלמנטים =====================
+  // ===================== Elements =====================
   const $ = id => document.getElementById(id);
-  const grid = $('grid'), more = $('more'), empty = $('empty'), count = $('count'), search = $('search'), langSel = $('lang');
+  const grid = $('grid'), more = $('more'), empty = $('empty'), count = $('count'), search = $('search');
+  const langBtn = $('langBtn'), langMenu = $('langMenu'), langFlag = $('langFlag'), langName = $('langName');
+  const mic = $('mic'), micMsg = $('micMsg');
   const lb = $('lb'), lbImg = $('lbImg'), lbName = $('lbName'), lbIdx = $('lbIdx'), stage = $('stage');
   const renameBar = $('renameBar'), newName = $('newName'), ext = $('ext'), saveName = $('saveName'), msg = $('msg');
   const canFS = 'showDirectoryPicker' in window;
   const IMG = /\.(jpe?g|png|gif|webp|bmp|avif)$/i;
-  const PAGE = 100;   // כמה כרטיסים נבנים בכל פעם; השאר נטענים כשמגיעים לסוף
+  const PAGE = 100;   // cards built per batch; the rest load when you reach the bottom
 
-  let items = [];     // {name, url, handle, parent} – הרשימה המלאה
-  let shown = [];     // אחרי סינון
-  let rendered = 0;   // כמה מתוך shown כבר ברשת
+  let items = [];     // {name, url, handle, parent, keys} – the full list
+  let shown = [];     // after filtering
+  let rendered = 0;   // how many of `shown` are in the grid
   let cur = -1;
 
-  // בורר שפות
+  // ---------- language menu (flag + native name) ----------
   Object.keys(T).forEach(code => {
-    const o = document.createElement('option');
-    o.value = code; o.textContent = T[code].name;
-    langSel.appendChild(o);
+    const b = document.createElement('button');
+    b.type = 'button'; b.role = 'option'; b.dataset.code = code;
+    b.innerHTML = `<span class="flag">${FLAGS[T[code].flag] || ''}</span><span class="native">${T[code].name}</span><span class="code">${code}</span>`;
+    b.onclick = () => { history.replaceState(null, '', '#lang=' + code); applyLang(code); closeLangMenu(); };
+    langMenu.appendChild(b);
   });
-  langSel.onchange = () => {
-    history.replaceState(null, '', '#lang=' + langSel.value); // בכתובת בלבד – בלי אחסון
-    applyLang(langSel.value);
-  };
+  function openLangMenu() { langMenu.classList.remove('hidden'); langBtn.setAttribute('aria-expanded', 'true'); langMenu.querySelector('[aria-checked=true]')?.focus(); }
+  function closeLangMenu() { langMenu.classList.add('hidden'); langBtn.setAttribute('aria-expanded', 'false'); }
+  langBtn.onclick = () => langMenu.classList.contains('hidden') ? openLangMenu() : closeLangMenu();
+  document.addEventListener('click', e => { if (!e.target.closest('.langwrap')) closeLangMenu(); });
+  langMenu.addEventListener('keydown', e => {
+    const bs = [...langMenu.querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); bs[(i + 1) % bs.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); bs[(i - 1 + bs.length) % bs.length].focus(); }
+    else if (e.key === 'Escape') { closeLangMenu(); langBtn.focus(); }
+  });
+
+  // ===================== Cross-script matching (Hebrew ⇄ Latin) =====================
+  // A filter typed or spoken in one script also matches file names written in the other.
+  // Names are reduced to rough consonant keys: Hebrew letters → Latin sounds, vowels dropped,
+  // so "Yossi" ≈ "yosi" ≈ "יוסי" and "Rivka" ≈ "רבקה". Hebrew vav/yod can be vowels or consonants,
+  // so Hebrew text yields both readings. Approximate on purpose – it finds names, it does not translate.
+  // Hebrew letter → Latin sound. sh/s and ch/kh/h/k are merged on purpose: transliteration is inconsistent
+  // about them, and a filter is better off matching a few extra names than missing one.
+  const HE2LAT = { 'א':'', 'ב':'v', 'ג':'g', 'ד':'d', 'ה':'h', 'ו':'v', 'ז':'z', 'ח':'k',
+                   'ט':'t', 'י':'y', 'כ':'k', 'ך':'k', 'ל':'l', 'מ':'m', 'ם':'m', 'נ':'n',
+                   'ן':'n', 'ס':'s', 'ע':'', 'פ':'f', 'ף':'f', 'צ':'ts', 'ץ':'ts', 'ק':'k',
+                   'ר':'r', 'ש':'s', 'ת':'t' };
+  const HEB = /[א-ת]/;
+  const LAT_FOLD = [[/sch|sh/g,'s'],[/ph/g,'f'],[/ck|kh|ch|q/g,'k'],[/c(?=[eiy])/g,'s'],[/c/g,'k'],[/[wb]/g,'v'],[/p/g,'f'],[/x/g,'ks'],[/tz|tc|z/g,'ts'],[/j/g,'y']];
+  function latinKey(s) {
+    for (const [re, to] of LAT_FOLD) s = s.replace(re, to);
+    s = s.replace(/[aeiou]/g, '');                 // drop vowels
+    s = s.replace(/(?<=[a-z])y(?=[a-z])|y$|^y(?=[aeiou])/g, ''); // y as a vowel (Yossi, Avi, Chaim)
+    s = s.replace(/h$/g, '').replace(/h/g, 'k');   // final h silent (Sarah); elsewhere ≈ guttural (Shahar / שחר)
+    s = s.replace(/(.)\1+/g, '$1');                // collapse doubles – after vowels are gone
+    return s.replace(/[^a-z0-9؀-ۿЀ-ӿ]+/g, ' ').trim();   // Arabic/Cyrillic letters kept as they are
+  }
+  function hebToLatin(w, vowelVav) {             // one reading of a Hebrew word
+    w = w.replace(/וו/g, 'v').replace(/יי/g, 'y');   // doubled vav / yod are consonants
+    if (vowelVav) w = w.replace(/(?<=[א-ת])ו(?=[א-ת])/g, 'o');   // vav between letters = o/u
+    w = w.replace(/(?<=[א-ת])י(?=[א-ת]|$)/g, 'i');              // yod after a letter = i
+    return w.replace(/[א-ת]/g, ch => HE2LAT[ch] ?? ch);
+  }
+  function phonKeys(s) {                          // → array of keys (1 for Latin text, 2 for Hebrew)
+    s = s.toLowerCase().normalize('NFKD').replace(/[֑-ׇ̀-ͯ׳״"']/g, '');   // niqqud, accents, geresh
+    if (!HEB.test(s)) return [latinKey(s)];
+    return [true, false].map(vv => latinKey(s.replace(/[א-ת]+/g, w => hebToLatin(w, vv))));
+  }
+  const stem = name => name.replace(/\.[^.\/]+$/, '');   // extension never takes part in matching
+  const keysOf = name => ({ raw: name.toLowerCase(), ph: phonKeys(stem(name)) });
+  function matches(it, qraw, qkeys) {
+    if (!qraw) return true;
+    if (it.keys.raw.includes(qraw)) return true;                // ordinary substring match
+    return qkeys.some(q => q && it.keys.ph.some(k =>
+      q.length >= 2 ? k.includes(q) : k.split(' ').includes(q)   // one-consonant names (Noa) must match a whole word
+    ));
+  }
+
+  // ===================== Voice search (on-device only) =====================
+  // Uses the browser's Web Speech API *only* in on-device mode (processLocally = true).
+  // The button is shown only when the browser can recognise speech locally for the current language;
+  // otherwise it is hidden. The code never falls back to cloud recognition, so audio never leaves the device.
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, listening = false;
+  function setMicMsg(s) { micMsg.textContent = s || ''; }
+  async function setupMic() {
+    stopMic();
+    mic.classList.add('hidden'); setMicMsg('');
+    if (!SR || typeof SR.available !== 'function') return;       // no on-device capability in this browser
+    const opts = { langs: [T[lang].speech], processLocally: true };
+    let status;
+    try { status = await SR.available(opts); } catch { return; }
+    if (status === 'available' || status === 'downloadable' || status === 'downloading') mic.classList.remove('hidden');
+  }
+  async function startMic() {
+    if (!SR) return;
+    const opts = { langs: [T[lang].speech], processLocally: true };
+    let status = await SR.available(opts).catch(() => 'unavailable');
+    if (status === 'downloadable') {
+      setMicMsg(t('micDownload'));
+      const ok = await SR.install(opts).catch(() => false);
+      status = ok ? 'available' : 'unavailable';
+    }
+    if (status !== 'available') { setMicMsg(t('micUnavailable')); mic.classList.add('hidden'); return; }
+    rec = new SR();
+    rec.lang = T[lang].speech;
+    rec.processLocally = true;      // on-device only – never cloud
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    rec.onstart = () => { listening = true; mic.classList.add('listening'); setMicMsg(t('micListening')); };
+    rec.onresult = e => {
+      let text = '';
+      for (const r of e.results) text += r[0].transcript;
+      search.value = text.trim(); render();
+    };
+    rec.onerror = e => { setMicMsg(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? t('micDenied') : e.error === 'no-speech' ? t('micNone') : t('micUnavailable')); };
+    rec.onend = () => { listening = false; mic.classList.remove('listening'); if (micMsg.textContent === t('micListening')) setMicMsg(''); rec = null; };
+    try { rec.start(); } catch { setMicMsg(t('micUnavailable')); }
+  }
+  function stopMic() { if (rec) { try { rec.stop(); } catch {} } }
+  mic.onclick = () => listening ? stopMic() : startMic();
 
   const splitExt = n => { const m = n.match(/^(.*?)(\.[^.]*)?$/); return [m[1], m[2] || '']; };
   const sortItems = () => items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
   function clear() { items.forEach(i => URL.revokeObjectURL(i.url)); items = []; }
 
-  // ===================== טעינה =====================
-  function loadFiles(fileList) {           // דרך input (צפייה בלבד)
+  // ===================== Loading =====================
+  function loadFiles(fileList) {           // via <input> (view only)
     clear();
     items = [...fileList]
       .filter(f => f.type.startsWith('image/') || IMG.test(f.name))
-      .map(f => ({ name: f.webkitRelativePath || f.name, url: URL.createObjectURL(f), handle: null, parent: null }));
+      .map(f => { const name = f.webkitRelativePath || f.name; return { name, url: URL.createObjectURL(f), handle: null, parent: null, keys: keysOf(name) }; });
     finish();
   }
-  async function pickDir() {               // File System Access API (עם שינוי שם)
+  async function pickDir() {               // File System Access API (with rename)
     if (!canFS) { $('dirInput').click(); return; }
     let dir;
     try { dir = await window.showDirectoryPicker({ mode: 'readwrite' }); }
-    catch { return; }                      // בוטל או נדחה
+    catch { return; }                      // cancelled or denied
     clear();
     await walk(dir, '');
     finish();
@@ -206,13 +366,14 @@
       if (handle.kind === 'directory') await walk(handle, prefix + name + '/');
       else if (IMG.test(name)) {
         const f = await handle.getFile();
-        items.push({ name: prefix + name, url: URL.createObjectURL(f), handle, parent: dir });
+        const full = prefix + name;
+        items.push({ name: full, url: URL.createObjectURL(f), handle, parent: dir, keys: keysOf(full) });
       }
     }
   }
   function finish() { sortItems(); search.value = ''; render(); }
 
-  // ===================== רשת =====================
+  // ===================== Grid =====================
   function makeCard(it, idx) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -225,21 +386,21 @@
     return card;
   }
   function render() {
-    const q = search.value.trim().toLowerCase();
-    shown = q ? items.filter(i => i.name.toLowerCase().includes(q)) : items;
+    const qraw = search.value.trim().toLowerCase(), qkeys = qraw ? phonKeys(qraw) : [];
+    shown = qraw ? items.filter(i => matches(i, qraw, qkeys)) : items;
     grid.innerHTML = '';
     rendered = 0;
     empty.style.display = items.length ? 'none' : '';
     renderMore();
   }
-  function renderMore() {                  // 100 הבאים; נקרא שוב כשהחיישן בתחתית נכנס לתצוגה
+  function renderMore() {                  // next 100; called again when the sentinel at the bottom comes into view
     const end = Math.min(rendered + PAGE, shown.length);
     const frag = document.createDocumentFragment();
     for (let i = rendered; i < end; i++) frag.appendChild(makeCard(shown[i], i));
     grid.appendChild(frag);
     rendered = end;
     updateStatus();
-    if (rendered < shown.length) requestAnimationFrame(() => {   // מסך גדול: להמשיך עד שיש מה לגלול
+    if (rendered < shown.length) requestAnimationFrame(() => {   // tall screens: keep going until there is something to scroll
       if (more.getBoundingClientRect().top < innerHeight + 600) renderMore();
     });
   }
@@ -251,11 +412,11 @@
     if (entries.some(e => e.isIntersecting) && rendered < shown.length) renderMore();
   }, { rootMargin: '600px' }).observe(more);
 
-  // ===================== תצוגה מוגדלת =====================
+  // ===================== Lightbox =====================
   function open(i) { cur = i; show(); lb.classList.add('open'); }
   function show() {
     const it = shown[cur];
-    while (rendered <= cur && rendered < shown.length) renderMore();   // שהכרטיס יהיה ברשת כשסוגרים
+    while (rendered <= cur && rendered < shown.length) renderMore();   // make sure the card exists when closing
     lbImg.src = it.url;
     lbName.textContent = it.name;
     lbIdx.textContent = `${cur + 1} / ${shown.length}`;
@@ -270,7 +431,7 @@
   function step(d) { if (!shown.length) return; cur = (cur + d + shown.length) % shown.length; show(); }
   function setMsg(text, ok) { msg.textContent = text; msg.className = ok ? 'ok' : ''; }
 
-  // ===================== שינוי שם בדיסק (הסיומת נשמרת) =====================
+  // ===================== Rename on disk (extension kept) =====================
   async function doRename() {
     const it = shown[cur]; if (!it || !it.handle) return;
     const oldFull = it.name.split('/').pop();
@@ -291,7 +452,7 @@
       if (typeof it.handle.move === 'function') {
         try { await it.handle.move(target); newHandle = it.handle; } catch { newHandle = null; }
       }
-      if (!newHandle) {                    // גיבוי: העתקה לשם החדש, אימות גודל, ואז מחיקת המקורי
+      if (!newHandle) {                    // fallback: copy to the new name, verify size, then delete the original
         const file = await it.handle.getFile();
         newHandle = await it.parent.getFileHandle(target, { create: true });
         const w = await newHandle.createWritable();
@@ -306,6 +467,7 @@
       it.url = URL.createObjectURL(nf);
       it.handle = newHandle;
       it.name = it.name.slice(0, it.name.length - oldFull.length) + target;
+      it.keys = keysOf(it.name);
       sortItems(); render();
       cur = shown.indexOf(it);
       if (cur < 0) close(); else { show(); setMsg(t('msgDone'), true); }
@@ -316,7 +478,7 @@
     }
   }
 
-  // ===================== אירועים =====================
+  // ===================== Events =====================
   $('pickDir').onclick = pickDir;
   $('dirInput').onchange = e => loadFiles(e.target.files);
   $('files').onchange = e => loadFiles(e.target.files);
