@@ -4,6 +4,8 @@
 
 **גרסה נוכחית: 1.0.0**
 
+[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+
 קובץ HTML יחיד שמציג תמונות מתיקייה במחשב, עם סינון לפי שם קובץ, תצוגה מוגדלת ושינוי שם קובץ (הסיומת נשמרת).
 הכול רץ בתוך הדפדפן, על המכשיר בלבד. אין שרת, אין התקנה, אין רשת.
 
@@ -91,7 +93,7 @@
 
 ## 5. שמירה ב־Git ושיתוף עם כולם
 
-**הכלל:** הריפו מכיל את **הכלי בלבד** – `LocalPictureGallery.html`, `README.md`, `.gitignore`.
+**הכלל:** הריפו מכיל את **הכלי בלבד** – `LocalPictureGallery.html`, `README.md`, `.gitignore`, ושני סקריפטי הבדיקה (`security-check.sh`, `runtime-check.js`) עם ה־workflow ב־`.github/workflows/`.
 תמונות לעולם לא נכנסות ל־Git. קובץ `.gitignore` המצורף חוסם את כל סוגי התמונות.
 
 ### יצירת הריפו (פעם אחת)
@@ -178,6 +180,40 @@ git push origin v1.0.0
 
 ---
 
+## 8. אימות אבטחה אוטומטי
+
+התג **Security check** בראש הקובץ משקף תוצאה חיה, לא הצהרה: GitHub מריץ את הבדיקות בכל `push` ל־`main`, בכל Pull Request ובכל גרסה שמתפרסמת. ירוק = ה־commit האחרון עבר; אדום = משהו נשבר. לחיצה על התג פותחת את לוג הריצה, שורה־שורה.
+
+מה נבדק (הקבצים `security-check.sh` ו־`runtime-check.js` בריפו – כל אחד יכול לקרוא ולהריץ אותם):
+
+| בדיקה | איך |
+|---|---|
+| אין כתובות `http://` / `https://` | סריקה סטטית של הקובץ |
+| אין סקריפטים, CSS, iframe או embed חיצוניים | סריקה סטטית |
+| אין `fetch` / `XMLHttpRequest` / `WebSocket` / `sendBeacon` / `EventSource` | סריקה סטטית |
+| אין `eval` / `new Function` / `import()` | סריקה סטטית |
+| אין `localStorage` / `sessionStorage` / `IndexedDB` / cookies / Service Worker | סריקה סטטית |
+| אין טפסים או `submit` | סריקה סטטית |
+| מקורות תמונה הם `blob:` בלבד | סריקה סטטית |
+| קובץ יחיד: בדיוק `<script>` אחד ו־`<style>` אחד, פנימיים | סריקה סטטית |
+| הדף נטען בדפדפן ללא ממשק (jsdom) עם סקריפטים פעילים ומבצע **0 בקשות רשת** | בדיקת ריצה |
+| שלוש חותמות הגרסה זהות, ובגרסה מתויגת – זהות לתג | בדיקת ריצה |
+| בריפו אין קובצי תמונה | `git ls-files` |
+
+**להריץ מקומית** (Git Bash / WSL / macOS / Linux; Node לבדיקת הריצה):
+
+```bash
+bash security-check.sh LocalPictureGallery.html
+```
+
+```bash
+npm install jsdom && node runtime-check.js LocalPictureGallery.html
+```
+
+**מה הבדיקה לא מכסה:** היא מאמתת שהקובץ *לא יכול* לדבר עם רשת ולא שומר דבר – לא שהוא חף מבאגים. היא גם לא בודקת את הדפדפן עצמו (ראה סעיף 6). מי שרוצה ביקורת עצמאית – הקוד כולו בקובץ אחד, ~300 שורות.
+
+---
+
 <a name="english"></a>
 
 # LocalPictureGallery – Local Image Viewer (`LocalPictureGallery.html`)
@@ -185,6 +221,8 @@ git push origin v1.0.0
 [עברית](#he) · English · [github.com/BacharGroup/LocalPictureGallery](https://github.com/BacharGroup/LocalPictureGallery)
 
 **Current version: 1.0.0**
+
+[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
 
 A single HTML file that displays images from a folder on your computer, with filtering by file name, full-size view, and file renaming (the extension is preserved).
 Everything runs inside the browser, on the device only. No server, no installation, no network.
@@ -273,7 +311,7 @@ One note for accuracy: the file itself sends nothing. What the browser does on i
 
 ## 5. Keeping it in Git and sharing with everyone
 
-**The rule:** the repo contains **the tool only** – `LocalPictureGallery.html`, `README.md`, `.gitignore`.
+**The rule:** the repo contains **the tool only** – `LocalPictureGallery.html`, `README.md`, `.gitignore`, and the two check scripts (`security-check.sh`, `runtime-check.js`) with the workflow in `.github/workflows/`.
 Images never go into Git. The attached `.gitignore` blocks every image type.
 
 ### Creating the repo (once)
@@ -357,3 +395,37 @@ Then on GitHub: Releases → Draft a new release → choose the `v1.0.0` tag →
 3. New tag and Release in the same way (`v1.0.1`, `v1.1.0`...).
 
 Downloading a specific version: Releases page → the version you want → the attached file. The link `.../releases/latest` always leads to the latest version.
+
+---
+
+## 8. Automated security verification
+
+The **Security check** badge at the top reflects a live result, not a statement: GitHub runs the checks on every `push` to `main`, every pull request and every published release. Green = the latest commit passed; red = something broke. Clicking the badge opens the run log, line by line.
+
+What is checked (the files `security-check.sh` and `runtime-check.js` in the repo – anyone can read and run them):
+
+| Check | How |
+|---|---|
+| No `http://` / `https://` addresses | static scan of the file |
+| No external scripts, CSS, iframes or embeds | static scan |
+| No `fetch` / `XMLHttpRequest` / `WebSocket` / `sendBeacon` / `EventSource` | static scan |
+| No `eval` / `new Function` / `import()` | static scan |
+| No `localStorage` / `sessionStorage` / `IndexedDB` / cookies / Service Worker | static scan |
+| No forms or `submit` | static scan |
+| Image sources are `blob:` only | static scan |
+| Single file: exactly one `<script>` and one `<style>`, both inline | static scan |
+| The page loads in a headless browser (jsdom) with scripts enabled and makes **0 network requests** | runtime check |
+| The three version stamps match, and on a tagged release match the tag | runtime check |
+| No image files in the repository | `git ls-files` |
+
+**Run locally** (Git Bash / WSL / macOS / Linux; Node for the runtime check):
+
+```bash
+bash security-check.sh LocalPictureGallery.html
+```
+
+```bash
+npm install jsdom && node runtime-check.js LocalPictureGallery.html
+```
+
+**What the check does not cover:** it verifies that the file *cannot* talk to a network and stores nothing – not that it is bug-free. It also does not check the browser itself (see section 6). For an independent audit – the whole code is one file, ~300 lines.
