@@ -1,11 +1,11 @@
 <!doctype html>
-<!-- LocalPictureGallery v1.1.1 -->
+<!-- LocalPictureGallery v1.2.1 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="application-name" content="LocalPictureGallery">
-<meta name="version" content="1.1.1">
+<meta name="version" content="1.2.1">
 <title>LocalPictureGallery</title>
 <style>
   :root { --bg:#111; --fg:#eee; --muted:#999; --card:#1c1c1c; --accent:#4c8bf5; }
@@ -139,7 +139,7 @@
 
 <script>
 (() => {
-  const VERSION = '1.1.1';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
+  const VERSION = '1.2.1';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
 
   // ===================== Languages =====================
   // Default = device/browser language. Hebrew → Hebrew, anything else → English unless that language exists here.
@@ -272,7 +272,7 @@
     s = s.replace(/[aeiou]/g, '');                 // drop vowels
     s = s.replace(/(?<=[a-z])y(?=[a-z])|y$|^y(?=[aeiou])/g, ''); // y as a vowel (Yossi, Avi, Chaim)
     s = s.replace(/h$/g, '').replace(/h/g, 'k');   // final h silent (Sarah); elsewhere ≈ guttural (Shahar / שחר)
-    s = s.replace(/(.)\1+/g, '$1');                // collapse doubles – after vowels are gone
+    s = s.replace(/([a-z])\1+/g, '$1');            // collapse doubled letters only – digits are kept exactly (117 ≠ 17)
     return s.replace(/[^a-z0-9؀-ۿЀ-ӿ]+/g, ' ').trim();   // Arabic/Cyrillic letters kept as they are
   }
   function hebToLatin(w, vowelVav) {             // one reading of a Hebrew word
@@ -291,9 +291,65 @@
   function matches(it, qraw, qkeys) {
     if (!qraw) return true;
     if (it.keys.raw.includes(qraw)) return true;                // ordinary substring match
+    if (/^[\d\s._-]+$/.test(qraw)) return false;              // a numeric query is exact – no phonetic matching
     return qkeys.some(q => q && it.keys.ph.some(k =>
       q.length >= 2 ? k.includes(q) : k.split(' ').includes(q)   // one-consonant names (Noa) must match a whole word
     ));
+  }
+
+  // ===================== Spoken numbers → digits =====================
+  // The recognizer returns digits for English ("forty-two" → 42) but words for Hebrew and Arabic.
+  // This converts number words in a transcript to digits, 0–999,999, so "תמונה ארבעים ושתיים" → "תמונה 42"
+  // and "صورة خمسة وعشرين" → "صورة 25". Eastern Arabic digits (٤٢) are folded to 42 as well.
+  // Non-number words pass through untouched. Compounds use the natural order of each language.
+  const NUM = {
+    he: { units: { 'אפס':0,'אחד':1,'אחת':1,'שניים':2,'שתיים':2,'שני':2,'שתי':2,'שלוש':3,'שלושה':3,'ארבע':4,'ארבעה':4,'חמש':5,'חמישה':5,
+                   'שש':6,'שישה':6,'שבע':7,'שבעה':7,'שמונה':8,'תשע':9,'תשעה':9,'עשר':10,'עשרה':10,
+                   'שלושת':3,'ארבעת':4,'חמשת':5,'ששת':6,'שבעת':7,'שמונת':8,'תשעת':9,'עשרת':10,
+                   'אחד עשר':11,'אחת עשרה':11,'שנים עשר':12,'שתים עשרה':12,'שלושה עשר':13,'שלוש עשרה':13,'ארבעה עשר':14,'ארבע עשרה':14,
+                   'חמישה עשר':15,'חמש עשרה':15,'שישה עשר':16,'שש עשרה':16,'שבעה עשר':17,'שבע עשרה':17,'שמונה עשר':18,'שמונה עשרה':18,'תשעה עשר':19,'תשע עשרה':19 },
+          tens:  { 'עשרים':20,'שלושים':30,'ארבעים':40,'חמישים':50,'שישים':60,'שבעים':70,'שמונים':80,'תשעים':90 },
+          hundreds: { 'מאה':100,'מאתיים':200,'שלוש מאות':300,'ארבע מאות':400,'חמש מאות':500,'שש מאות':600,'שבע מאות':700,'שמונה מאות':800,'תשע מאות':900 },
+          thousand: { 'אלף':1000,'אלפיים':2000 }, thousands: 'אלפים', and: 'ו' },
+    ar: { units: { 'صفر':0,'واحد':1,'واحدة':1,'اثنان':2,'اثنين':2,'اثنتان':2,'اثنتين':2,'ثلاثة':3,'ثلاث':3,'أربعة':4,'اربعة':4,'أربع':4,'اربع':4,
+                   'خمسة':5,'خمس':5,'ستة':6,'ست':6,'سبعة':7,'سبع':7,'ثمانية':8,'ثماني':8,'تسعة':9,'تسع':9,'عشرة':10,'عشر':10,
+                   'أحد عشر':11,'احد عشر':11,'إحدى عشرة':11,'احدى عشرة':11,'اثنا عشر':12,'اثني عشر':12,'اثنتا عشرة':12,'اثنتي عشرة':12,
+                   'ثلاثة عشر':13,'ثلاث عشرة':13,'أربعة عشر':14,'اربعة عشر':14,'أربع عشرة':14,'خمسة عشر':15,'خمس عشرة':15,'ستة عشر':16,'ست عشرة':16,
+                   'سبعة عشر':17,'سبع عشرة':17,'ثمانية عشر':18,'ثماني عشرة':18,'تسعة عشر':19,'تسع عشرة':19 },
+          tens:  { 'عشرون':20,'عشرين':20,'ثلاثون':30,'ثلاثين':30,'أربعون':40,'اربعون':40,'أربعين':40,'اربعين':40,'خمسون':50,'خمسين':50,
+                   'ستون':60,'ستين':60,'سبعون':70,'سبعين':70,'ثمانون':80,'ثمانين':80,'تسعون':90,'تسعين':90 },
+          hundreds: { 'مائة':100,'مئة':100,'مائتان':200,'مائتين':200,'مئتان':200,'مئتين':200,'ثلاثمائة':300,'ثلاثمئة':300,'أربعمائة':400,'اربعمائة':400,'أربعمئة':400,'اربعمئة':400,
+                      'خمسمائة':500,'خمسمئة':500,'ستمائة':600,'ستمئة':600,'سبعمائة':700,'سبعمئة':700,'ثمانمائة':800,'ثمانمئة':800,'تسعمائة':900,'تسعمئة':900 },
+          thousand: { 'ألف':1000,'الف':1000,'ألفان':2000,'الفان':2000,'ألفين':2000,'الفين':2000 }, thousands: 'آلاف', and: 'و' }
+  };
+  function wordsToDigits(text) {
+    text = text.replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660));   // Eastern Arabic digits → 0-9
+    for (const L of Object.values(NUM)) {
+      const all = { ...L.units, ...L.tens, ...L.hundreds, ...L.thousand };
+      const strip = w => w.replace(new RegExp('^' + L.and + '(?=.)'), '');                 // leading "and" (ו / و) glued to the word
+      const isNum = w => all[strip(w)] !== undefined || strip(w) === L.thousands;
+      const words = text.split(/\s+/), out = [];
+      const startsNum = i => isNum(words[i]) || (i + 1 < words.length && all[strip(words[i]) + ' ' + strip(words[i + 1])] !== undefined);
+      for (let i = 0; i < words.length; ) {
+        if (!startsNum(i)) { out.push(words[i]); i++; continue; }
+        // collect a run of number words (two-word units like "ארבע עשרה" are joined first)
+        let total = 0, cur = 0, j = i, any = false;
+        while (j < words.length) {
+          let w = strip(words[j]), pair = j + 1 < words.length ? w + ' ' + strip(words[j + 1]) : null;
+          if (pair && all[pair] !== undefined) { w = pair; j += 2; } else if (isNum(words[j])) j++; else break;
+          if (all[w] === undefined && w !== L.thousands) break;
+          const v = all[w];
+          if (w === L.thousands) { total += (cur || 1) * 1000; cur = 0; }
+          else if (v >= 1000)    { total += (cur || 1) * (v === 1000 ? 1000 : v); cur = 0; }
+          else if (v >= 100)     { cur += v; }
+          else                   { cur += v; }
+          any = true;
+        }
+        out.push(String(total + cur)); i = any ? j : i + 1;
+      }
+      text = out.join(' ');
+    }
+    return text;
   }
 
   // ===================== Voice search (on-device only) =====================
@@ -331,7 +387,7 @@
     rec.onresult = e => {
       let text = '';
       for (const r of e.results) text += r[0].transcript;
-      search.value = text.trim(); render();
+      search.value = wordsToDigits(text.trim()); render();
     };
     rec.onerror = e => { setMicMsg(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? t('micDenied') : e.error === 'no-speech' ? t('micNone') : t('micUnavailable')); };
     rec.onend = () => { listening = false; mic.classList.remove('listening'); if (micMsg.textContent === t('micListening')) setMicMsg(''); rec = null; };
