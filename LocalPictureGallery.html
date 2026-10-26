@@ -1,0 +1,352 @@
+<!doctype html>
+<!-- LocalPictureGallery v1.0.0 -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="application-name" content="LocalPictureGallery">
+<meta name="version" content="1.0.0">
+<title>LocalPictureGallery</title>
+<style>
+  :root { --bg:#111; --fg:#eee; --muted:#999; --card:#1c1c1c; --accent:#4c8bf5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  header { position:sticky; top:0; z-index:5; background:rgba(17,17,17,.95); backdrop-filter:blur(6px);
+           padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #222; }
+  header h1 { font-size:18px; margin:0; margin-inline-end:8px; }
+  .btn { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; font-size:14px; cursor:pointer; }
+  .btn.secondary { background:#333; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  input[type=file] { display:none; }
+  #search { flex:1; min-width:160px; padding:8px 12px; border-radius:8px; border:1px solid #333; background:#1a1a1a; color:var(--fg); font-size:14px; }
+  #count { color:var(--muted); font-size:13px; }
+  #ver { color:var(--muted); font-size:11px; direction:ltr; }
+  #lang { background:#1a1a1a; color:var(--fg); border:1px solid #333; border-radius:8px; padding:7px 8px; font-size:13px; }
+  main { padding:16px; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  .card { background:var(--card); border-radius:10px; overflow:hidden; cursor:pointer; }
+  .card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#000; }
+  /* שמות קבצים תמיד LTR; היישור עוקב אחרי כיוון הממשק */
+  .card .name { padding:6px 8px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; text-align:left; }
+  html[dir=rtl] .card .name { text-align:right; }
+  #empty { color:var(--muted); text-align:center; padding:60px 20px; line-height:1.6; }
+  #more { color:var(--muted); text-align:center; padding:20px; font-size:13px; min-height:1px; }
+
+  #lb { position:fixed; inset:0; background:rgba(0,0,0,.95); display:none; flex-direction:column; z-index:10; }
+  #lb.open { display:flex; }
+  #lb .bar { display:flex; align-items:center; gap:10px; padding:10px 16px; color:var(--muted); font-size:13px; flex-wrap:wrap; }
+  #lb .bar .name { flex:1; direction:ltr; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--fg); }
+  html[dir=rtl] #lb .bar .name { text-align:right; }
+  /* שורת שינוי השם קבועה: אנגלית, LTR, מוצמדת לשמאל – בכל שפת ממשק */
+  #renameBar { border-top:1px solid #222; direction:ltr; justify-content:flex-start; text-align:left; }
+  #renameWrap { display:flex; align-items:center; gap:6px; flex-wrap:wrap; direction:ltr; }
+  #newName { padding:6px 10px; border-radius:8px; border:1px solid #444; background:#1a1a1a; color:var(--fg); font-size:14px; min-width:240px; direction:ltr; text-align:left; }
+  #ext { color:var(--muted); direction:ltr; }
+  #msg { font-size:13px; color:#f66; }
+  #msg.ok { color:#6c6; }
+  .hidden { display:none !important; }
+  #lb .stage { flex:1; display:flex; align-items:center; justify-content:center; position:relative; min-height:0; }
+  #lb img { max-width:100%; max-height:100%; object-fit:contain; }
+  .nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.12); color:#fff; border:0;
+         font-size:26px; width:48px; height:64px; border-radius:8px; cursor:pointer; }
+  #prev { left:8px; } #next { right:8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 data-i18n="title"></h1><span id="ver"></span>
+  <button class="btn" id="pickDir" data-i18n="pickDir"></button>
+  <label class="btn secondary"><span data-i18n="pickFiles"></span><input type="file" id="files" accept="image/*" multiple></label>
+  <input type="file" id="dirInput" webkitdirectory multiple>
+  <input id="search" type="search" data-i18n-placeholder="search">
+  <span id="count"></span>
+  <select id="lang" title="Language"></select>
+</header>
+<main>
+  <div id="grid"></div>
+  <div id="more"></div>
+  <div id="empty"><span data-i18n="empty1"></span><br><span data-i18n="empty2"></span></div>
+</main>
+
+<div id="lb">
+  <div class="bar">
+    <button class="btn secondary" id="close" data-i18n="close"></button>
+    <span class="name" id="lbName"></span>
+    <span id="lbIdx"></span>
+  </div>
+  <div class="bar" id="renameBar">
+    <div id="renameWrap">
+      <label for="newName">File name:</label>
+      <input id="newName" type="text" placeholder="new name" autocomplete="off" spellcheck="false">
+      <span id="ext"></span>
+      <button class="btn" id="saveName">Save</button>
+    </div>
+    <span id="msg"></span>
+  </div>
+  <div class="stage" id="stage">
+    <button class="nav" id="prev" data-i18n-title="prev">◀</button>
+    <img id="lbImg" alt="">
+    <button class="nav" id="next" data-i18n-title="next">▶</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const VERSION = '1.0.0';   // לעדכן יחד עם התג ב-Git (ראה README, סעיף 7)
+  // ===================== שפות =====================
+  // ברירת מחדל: שפת המכשיר/הדפדפן. עברית → עברית, כל השאר → אנגלית (אלא אם השפה קיימת כאן).
+  // להוספת שפה: להעתיק בלוק שלם, לתת לו קוד ISO של שתי אותיות (fr, ru, es...) ולתרגם את המחרוזות.
+  // dir: 'rtl' לשפות שנכתבות מימין לשמאל, אחרת 'ltr'. {n} ו-{m} מוחלפים במספרים.
+  const T = {
+    he: {
+      name: 'עברית', dir: 'rtl',
+      title: 'LocalPictureGallery',
+      pickDir: 'בחר תיקייה', pickFiles: 'בחר קבצים',
+      search: 'סינון לפי שם קובץ…',
+      empty1: 'בחר תיקייה או קבצים כדי להציג תמונות.',
+      empty2: 'הכול נשאר במכשיר שלך – שום דבר לא נשלח לשום מקום.',
+      close: 'סגור ✕', prev: 'הקודמת', next: 'הבאה',
+      more: 'מוצגות {n} מתוך {m} – גלול להמשך',
+      msgEmpty: 'השם ריק',
+      msgInvalid: 'השם מכיל תווים לא חוקיים: \\ / : * ? " < > |',
+      msgSame: 'זה כבר השם הנוכחי',
+      msgExists: 'כבר קיים קובץ בשם הזה בתיקייה',
+      msgCopyFail: 'ההעתקה לא הושלמה – הקובץ המקורי לא נמחק',
+      msgDone: 'השם שונה ✓', msgFail: 'שינוי השם נכשל'
+    },
+    en: {
+      name: 'English', dir: 'ltr',
+      title: 'LocalPictureGallery',
+      pickDir: 'Choose folder', pickFiles: 'Choose files',
+      search: 'Filter by file name…',
+      empty1: 'Choose a folder or files to display images.',
+      empty2: 'Everything stays on your device – nothing is sent anywhere.',
+      close: 'Close ✕', prev: 'Previous', next: 'Next',
+      more: 'Showing {n} of {m} – scroll for more',
+      msgEmpty: 'Name is empty',
+      msgInvalid: 'Name contains invalid characters: \\ / : * ? " < > |',
+      msgSame: 'That is already the current name',
+      msgExists: 'A file with this name already exists in the folder',
+      msgCopyFail: 'Copy did not complete – the original was not deleted',
+      msgDone: 'Renamed ✓', msgFail: 'Rename failed'
+    }
+  };
+  const FALLBACK = 'en';
+  let lang = FALLBACK;
+  const t = (k, v = {}) => (T[lang][k] ?? T[FALLBACK][k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
+
+  function detectLang() {
+    // #lang=xx בכתובת גובר (לקישור/סימנייה בשפה קבועה); אחרת שפת המכשיר/הדפדפן
+    const fromHash = (location.hash.match(/lang=([A-Za-z-]+)/) || [])[1];
+    const cands = [fromHash, ...(navigator.languages || []), navigator.language]
+      .filter(Boolean).map(l => l.toLowerCase().split('-')[0]);
+    return cands.find(c => T[c]) || FALLBACK;
+  }
+
+  function applyLang(code) {
+    lang = T[code] ? code : FALLBACK;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = T[lang].dir || 'ltr';
+    document.title = t('title');
+    document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
+    document.querySelectorAll('[data-i18n-title]').forEach(el => el.title = t(el.dataset.i18nTitle));
+    langSel.value = lang;
+    updateStatus();
+  }
+
+  // ===================== אלמנטים =====================
+  const $ = id => document.getElementById(id);
+  const grid = $('grid'), more = $('more'), empty = $('empty'), count = $('count'), search = $('search'), langSel = $('lang');
+  const lb = $('lb'), lbImg = $('lbImg'), lbName = $('lbName'), lbIdx = $('lbIdx'), stage = $('stage');
+  const renameBar = $('renameBar'), newName = $('newName'), ext = $('ext'), saveName = $('saveName'), msg = $('msg');
+  const canFS = 'showDirectoryPicker' in window;
+  const IMG = /\.(jpe?g|png|gif|webp|bmp|avif)$/i;
+  const PAGE = 100;   // כמה כרטיסים נבנים בכל פעם; השאר נטענים כשמגיעים לסוף
+
+  let items = [];     // {name, url, handle, parent} – הרשימה המלאה
+  let shown = [];     // אחרי סינון
+  let rendered = 0;   // כמה מתוך shown כבר ברשת
+  let cur = -1;
+
+  // בורר שפות
+  Object.keys(T).forEach(code => {
+    const o = document.createElement('option');
+    o.value = code; o.textContent = T[code].name;
+    langSel.appendChild(o);
+  });
+  langSel.onchange = () => {
+    history.replaceState(null, '', '#lang=' + langSel.value); // בכתובת בלבד – בלי אחסון
+    applyLang(langSel.value);
+  };
+
+  const splitExt = n => { const m = n.match(/^(.*?)(\.[^.]*)?$/); return [m[1], m[2] || '']; };
+  const sortItems = () => items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  function clear() { items.forEach(i => URL.revokeObjectURL(i.url)); items = []; }
+
+  // ===================== טעינה =====================
+  function loadFiles(fileList) {           // דרך input (צפייה בלבד)
+    clear();
+    items = [...fileList]
+      .filter(f => f.type.startsWith('image/') || IMG.test(f.name))
+      .map(f => ({ name: f.webkitRelativePath || f.name, url: URL.createObjectURL(f), handle: null, parent: null }));
+    finish();
+  }
+  async function pickDir() {               // File System Access API (עם שינוי שם)
+    if (!canFS) { $('dirInput').click(); return; }
+    let dir;
+    try { dir = await window.showDirectoryPicker({ mode: 'readwrite' }); }
+    catch { return; }                      // בוטל או נדחה
+    clear();
+    await walk(dir, '');
+    finish();
+  }
+  async function walk(dir, prefix) {
+    for await (const [name, handle] of dir.entries()) {
+      if (handle.kind === 'directory') await walk(handle, prefix + name + '/');
+      else if (IMG.test(name)) {
+        const f = await handle.getFile();
+        items.push({ name: prefix + name, url: URL.createObjectURL(f), handle, parent: dir });
+      }
+    }
+  }
+  function finish() { sortItems(); search.value = ''; render(); }
+
+  // ===================== רשת =====================
+  function makeCard(it, idx) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const img = document.createElement('img');
+    img.loading = 'lazy'; img.src = it.url; img.alt = '';
+    const name = document.createElement('div');
+    name.className = 'name'; name.textContent = it.name; name.title = it.name;
+    card.append(img, name);
+    card.onclick = () => open(idx);
+    return card;
+  }
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    shown = q ? items.filter(i => i.name.toLowerCase().includes(q)) : items;
+    grid.innerHTML = '';
+    rendered = 0;
+    empty.style.display = items.length ? 'none' : '';
+    renderMore();
+  }
+  function renderMore() {                  // 100 הבאים; נקרא שוב כשהחיישן בתחתית נכנס לתצוגה
+    const end = Math.min(rendered + PAGE, shown.length);
+    const frag = document.createDocumentFragment();
+    for (let i = rendered; i < end; i++) frag.appendChild(makeCard(shown[i], i));
+    grid.appendChild(frag);
+    rendered = end;
+    updateStatus();
+    if (rendered < shown.length) requestAnimationFrame(() => {   // מסך גדול: להמשיך עד שיש מה לגלול
+      if (more.getBoundingClientRect().top < innerHeight + 600) renderMore();
+    });
+  }
+  function updateStatus() {
+    more.textContent = rendered < shown.length ? t('more', { n: rendered, m: shown.length }) : '';
+    count.textContent = items.length ? (shown.length === items.length ? `${items.length}` : `${shown.length} / ${items.length}`) : '';
+  }
+  new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting) && rendered < shown.length) renderMore();
+  }, { rootMargin: '600px' }).observe(more);
+
+  // ===================== תצוגה מוגדלת =====================
+  function open(i) { cur = i; show(); lb.classList.add('open'); }
+  function show() {
+    const it = shown[cur];
+    while (rendered <= cur && rendered < shown.length) renderMore();   // שהכרטיס יהיה ברשת כשסוגרים
+    lbImg.src = it.url;
+    lbName.textContent = it.name;
+    lbIdx.textContent = `${cur + 1} / ${shown.length}`;
+    setMsg('');
+    if (it.handle) {
+      renameBar.classList.remove('hidden');
+      const [base, e] = splitExt(it.name.split('/').pop());
+      newName.value = base; ext.textContent = e;
+    } else renameBar.classList.add('hidden');
+  }
+  function close() { lb.classList.remove('open'); lbImg.removeAttribute('src'); }
+  function step(d) { if (!shown.length) return; cur = (cur + d + shown.length) % shown.length; show(); }
+  function setMsg(text, ok) { msg.textContent = text; msg.className = ok ? 'ok' : ''; }
+
+  // ===================== שינוי שם בדיסק (הסיומת נשמרת) =====================
+  async function doRename() {
+    const it = shown[cur]; if (!it || !it.handle) return;
+    const oldFull = it.name.split('/').pop();
+    const [, e] = splitExt(oldFull);
+    const base = newName.value.trim();
+    if (!base) { setMsg(t('msgEmpty')); return; }
+    if (/[\\/:*?"<>|]/.test(base)) { setMsg(t('msgInvalid')); return; }
+    const target = base + e;
+    if (target === oldFull) { setMsg(t('msgSame')); return; }
+
+    saveName.disabled = true;
+    try {
+      let exists = true;
+      try { await it.parent.getFileHandle(target); } catch { exists = false; }
+      if (exists) throw new Error(t('msgExists'));
+
+      let newHandle = null;
+      if (typeof it.handle.move === 'function') {
+        try { await it.handle.move(target); newHandle = it.handle; } catch { newHandle = null; }
+      }
+      if (!newHandle) {                    // גיבוי: העתקה לשם החדש, אימות גודל, ואז מחיקת המקורי
+        const file = await it.handle.getFile();
+        newHandle = await it.parent.getFileHandle(target, { create: true });
+        const w = await newHandle.createWritable();
+        await w.write(file); await w.close();
+        const check = await newHandle.getFile();
+        if (check.size !== file.size) throw new Error(t('msgCopyFail'));
+        await it.parent.removeEntry(oldFull);
+      }
+
+      const nf = await newHandle.getFile();
+      URL.revokeObjectURL(it.url);
+      it.url = URL.createObjectURL(nf);
+      it.handle = newHandle;
+      it.name = it.name.slice(0, it.name.length - oldFull.length) + target;
+      sortItems(); render();
+      cur = shown.indexOf(it);
+      if (cur < 0) close(); else { show(); setMsg(t('msgDone'), true); }
+    } catch (err) {
+      setMsg(err && err.message ? err.message : t('msgFail'));
+    } finally {
+      saveName.disabled = false;
+    }
+  }
+
+  // ===================== אירועים =====================
+  $('pickDir').onclick = pickDir;
+  $('dirInput').onchange = e => loadFiles(e.target.files);
+  $('files').onchange = e => loadFiles(e.target.files);
+  search.oninput = render;
+  $('close').onclick = close;
+  $('prev').onclick = e => { e.stopPropagation(); step(-1); };
+  $('next').onclick = e => { e.stopPropagation(); step(1); };
+  stage.onclick = e => { if (e.target === stage) close(); };
+  saveName.onclick = doRename;
+  newName.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doRename(); } };
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (document.activeElement === newName) return;
+    if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+  });
+
+  let x0 = null;
+  stage.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+  });
+
+  $('ver').textContent = 'v' + VERSION;
+  applyLang(detectLang());
+})();
+</script>
+</body>
+</html>

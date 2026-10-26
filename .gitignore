@@ -1,0 +1,17 @@
+# תמונות לעולם לא נכנסות לריפו – רק הכלי עצמו
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.bmp
+*.avif
+*.heic
+*.heif
+*.tif
+*.tiff
+
+# קבצי מערכת
+Thumbs.db
+.DS_Store
+desktop.ini
