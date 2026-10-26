@@ -1,11 +1,11 @@
 <!doctype html>
-<!-- LocalPictureGallery v1.1.0 -->
+<!-- LocalPictureGallery v1.1.1 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="application-name" content="LocalPictureGallery">
-<meta name="version" content="1.1.0">
+<meta name="version" content="1.1.1">
 <title>LocalPictureGallery</title>
 <style>
   :root { --bg:#111; --fg:#eee; --muted:#999; --card:#1c1c1c; --accent:#4c8bf5; }
@@ -139,7 +139,7 @@
 
 <script>
 (() => {
-  const VERSION = '1.1.0';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
+  const VERSION = '1.1.1';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
 
   // ===================== Languages =====================
   // Default = device/browser language. Hebrew → Hebrew, anything else → English unless that language exists here.
@@ -240,7 +240,7 @@
     const b = document.createElement('button');
     b.type = 'button'; b.role = 'option'; b.dataset.code = code;
     b.innerHTML = `<span class="flag">${FLAGS[T[code].flag] || ''}</span><span class="native">${T[code].name}</span><span class="code">${code}</span>`;
-    b.onclick = () => { history.replaceState(null, '', '#lang=' + code); applyLang(code); closeLangMenu(); };
+    b.onclick = () => { applyLang(code); closeLangMenu(); };   // for this tab only – nothing is written to the address or the device
     langMenu.appendChild(b);
   });
   function openLangMenu() { langMenu.classList.remove('hidden'); langBtn.setAttribute('aria-expanded', 'true'); langMenu.querySelector('[aria-checked=true]')?.focus(); }

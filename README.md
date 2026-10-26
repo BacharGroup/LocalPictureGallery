@@ -35,7 +35,7 @@
 5. **חיפוש קולי** – 🎤 בתיבת החיפוש; מופיע רק כשהדפדפן מזהה דיבור במכשיר עצמו (ראה אבטחה).
 6. **תצוגה מוגדלת** – לחיצה על תמונה. ניווט: חיצים, מקשי ← →, החלקה. סגירה: ✕, Esc, או לחיצה על הרקע.
 7. **שינוי שם** – בתצוגה המוגדלת, שורת **File name** ← שם חדש ← **Save**. הסיומת קבועה. השינוי נעשה בדיסק מיד.
-8. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית).
+8. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית). הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
 
 **בלי Chrome/Edge או בטלפון:** **בחר קבצים** ← מסמנים תמונות. צפייה בלבד.
 
@@ -74,7 +74,7 @@
 - **שינוי אותיות גדולות/קטנות בלבד** נחסם ב־Windows וב־macOS ("כבר קיים").
 - **HEIC/HEIF** (צילומי iPhone) לא מוצגים. נתמכים: jpg, png, gif, webp, bmp, avif.
 - **ההתאמה עברית⇄אנגלית מקורבת** – שמות דומים עלולים להיתפס יחד. חיפוש בכתב של שם הקובץ תמיד מדויק.
-- **הרשאה ושפה לא נשמרות** בין הפעלות – בכוונה, כדי שלא יהיה אחסון.
+- **הרשאה ושפה לא נשמרות** בין הפעלות – בכוונה, כדי שלא יהיה אחסון. לשפה קבועה: `#lang=xx` בכתובת.
 
 ---
 
@@ -123,7 +123,7 @@ Renaming and voice search rely on capabilities that currently exist only in Chro
 5. **Voice search** – 🎤 in the search box; shown only when the browser recognises speech on the device itself (see Security).
 6. **Full-size view** – click an image. Navigate: arrows, ← → keys, swipe. Close: ✕, Esc, or click the background.
 7. **Rename** – in the full-size view, the **File name** row → new name → **Save**. The extension is fixed. The change is written to disk immediately.
-8. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English).
+8. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English). The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
 
 **Without Chrome/Edge, or on a phone:** **Choose files** → select images. View only.
 
@@ -162,7 +162,7 @@ What the check does not cover: bugs (it only verifies what the file *cannot* do)
 - **Changing letter case only** is blocked on Windows and macOS ("already exists").
 - **HEIC/HEIF** (iPhone photos) are not shown. Supported: jpg, png, gif, webp, bmp, avif.
 - **Hebrew⇄English matching is approximate** – similar names may be caught together. Searching in the file name's own script is always exact.
-- **Permission and language are not kept** between sessions – deliberately, so there is no storage.
+- **Permission and language are not kept** between sessions – deliberately, so there is no storage. For a fixed language: `#lang=xx` in the address.
 
 ---
 
