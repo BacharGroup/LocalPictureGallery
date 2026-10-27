@@ -37,7 +37,8 @@
 5. **חיפוש קולי** – 🎤 בתיבת החיפוש; מופיע רק כשהדפדפן מזהה דיבור במכשיר עצמו (ראה אבטחה). מספרים שנאמרים בעברית או בערבית הופכים לספרות ("ארבעים ושתיים" ← 42, "خمسة وعشرين" ← 25).
 6. **תצוגה מוגדלת** – לחיצה על תמונה. ניווט: חיצים, מקשי ← →, החלקה. סגירה: ✕, Esc, או לחיצה על הרקע.
 7. **שינוי שם** – בתצוגה המוגדלת, שורת **File name** ← שם חדש ← **Save**. הסיומת קבועה. השינוי נעשה בדיסק מיד.
-8. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית). הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
+8. **עדכון** – לחיצה על מספר הגרסה בפינה (`v1.x.y`) פותחת את עמוד הגרסה האחרונה ב-GitHub. זה הקישור היחיד בקובץ, והוא נפתח רק בלחיצה.
+9. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית). הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
 
 **בלי Chrome/Edge או בטלפון:** **בחר קבצים** ← מסמנים תמונות. צפייה בלבד.
 
@@ -57,13 +58,13 @@
 
 ## אבטחה ופרטיות
 
-**שום מידע לא יוצא מהמכשיר.** לקובץ אין קוד רשת: אין כתובות, אין סקריפטים חיצוניים, אין `fetch`, אין אחסון מקומי. התמונות נטענות לזיכרון הדפדפן ומשוחררות ברענון; הדף לא זוכר דבר בין הפעלות.
+**שום מידע לא יוצא מהמכשיר.** לקובץ אין קוד רשת: אין סקריפטים חיצוניים, אין `fetch`, אין אחסון מקומי. הכתובת היחידה בקובץ היא קישור רגיל לעמוד הגרסאות ב-GitHub, שהדפדפן לא טוען בעצמו – רק אם לוחצים עליו. התמונות נטענות לזיכרון הדפדפן ומשוחררות ברענון; הדף לא זוכר דבר בין הפעלות.
 
 **חיפוש קולי** משתמש בזיהוי הדיבור של הדפדפן **במצב מקומי בלבד** (`processLocally: true`). אם הדפדפן לא יכול לזהות דיבור במכשיר, הכפתור לא מוצג – אין מסלול לענן. בפעם הראשונה Chrome מוריד חבילת שפה; זו הורדה של הדפדפן, לא של הקובץ.
 
-**אימות אוטומטי.** התג **Security check** למעלה משקף ריצה חיה ב־GitHub על כל שינוי וכל גרסה, ולחיצה עליו פותחת את הלוג. הבדיקות (`security-check.sh`, `runtime-check.js`) מאמתות: אפס כתובות ושאבים חיצוניים, אפס קריאות רשת ואחסון, אפס `eval`, מקורות תמונה `blob:` בלבד, קובץ יחיד, 0 בקשות רשת בטעינה בדפדפן ללא ממשק, והתאמה בין מספר הגרסה בקובץ לתג ב־Git.
+**אימות אוטומטי.** התג **Security check** למעלה משקף ריצה חיה ב־GitHub על כל שינוי וכל גרסה, ולחיצה עליו פותחת את הלוג. הבדיקות (`security-check.sh`, `runtime-check.js`) מאמתות: אין כתובות או משאבים חיצוניים מלבד הקישור הזה, אפס קריאות רשת ואחסון, אפס `eval`, מקורות תמונה `blob:` בלבד, קובץ יחיד, 0 בקשות רשת בטעינה בדפדפן ללא ממשק, והתאמה בין מספר הגרסה בקובץ לתג ב־Git.
 
-**לבדוק בעצמך:** F12 ← Network ← בוחרים תיקייה ומשנים שם – הרשימה נשארת ריקה. או: מנתקים את האינטרנט; הכול עובד זהה.
+**לבדוק בעצמך:** F12 ← Network ← בוחרים תיקייה ומשנים שם – הרשימה נשארת ריקה. בעורך טקסט, חיפוש `https` מוצא תוצאה אחת בלבד – הקישור לגרסאות. או: מנתקים את האינטרנט; הכול עובד זהה.
 
 מה שהבדיקה לא מכסה: באגים (היא בודקת רק מה הקובץ *לא יכול* לעשות), והדפדפן עצמו – Safe Browsing, סנכרון ותוספים נשלטים בהגדרות הדפדפן.
 
@@ -127,7 +128,8 @@ Renaming and voice search rely on capabilities that currently exist only in Chro
 5. **Voice search** – 🎤 in the search box; shown only when the browser recognises speech on the device itself (see Security). Numbers spoken in Hebrew or Arabic become digits ("ארבעים ושתיים" → 42, "خمسة وعشرين" → 25).
 6. **Full-size view** – click an image. Navigate: arrows, ← → keys, swipe. Close: ✕, Esc, or click the background.
 7. **Rename** – in the full-size view, the **File name** row → new name → **Save**. The extension is fixed. The change is written to disk immediately.
-8. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English). The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
+8. **Update** – clicking the version number in the corner (`v1.x.y`) opens the latest release page on GitHub. It is the only link in the file, and it opens only when clicked.
+9. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English). The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
 
 **Without Chrome/Edge, or on a phone:** **Choose files** → select images. View only.
 
@@ -147,13 +149,13 @@ No installation, no operating-system permissions, no internet needed.
 
 ## Security and privacy
 
-**No data leaves the device.** The file has no network code: no addresses, no external scripts, no `fetch`, no local storage. Images are loaded into browser memory and released on refresh; the page remembers nothing between sessions.
+**No data leaves the device.** The file has no network code: no external scripts, no `fetch`, no local storage. The only address in the file is a plain link to the releases page on GitHub, which the browser never loads by itself – only if you click it. Images are loaded into browser memory and released on refresh; the page remembers nothing between sessions.
 
 **Voice search** uses the browser's speech recognition **in on-device mode only** (`processLocally: true`). If the browser cannot recognise speech on the device, the button is not shown – there is no cloud path. The first time, Chrome downloads a language pack; that is the browser's download, not the file's.
 
-**Automated verification.** The **Security check** badge above reflects a live run on GitHub for every change and every release; clicking it opens the log. The checks (`security-check.sh`, `runtime-check.js`) verify: zero addresses and external resources, zero network and storage calls, zero `eval`, `blob:` image sources only, a single file, 0 network requests when loaded in a headless browser, and that the version number in the file matches the Git tag.
+**Automated verification.** The **Security check** badge above reflects a live run on GitHub for every change and every release; clicking it opens the log. The checks (`security-check.sh`, `runtime-check.js`) verify: no addresses or external resources other than that one link, zero network and storage calls, zero `eval`, `blob:` image sources only, a single file, 0 network requests when loaded in a headless browser, and that the version number in the file matches the Git tag.
 
-**Check for yourself:** F12 → Network → choose a folder and rename a file – the list stays empty. Or disconnect the internet; everything works the same.
+**Check for yourself:** F12 → Network → choose a folder and rename a file – the list stays empty. In a text editor, searching `https` finds exactly one result – the releases link. Or disconnect the internet; everything works the same.
 
 What the check does not cover: bugs (it only verifies what the file *cannot* do), and the browser itself – Safe Browsing, sync and extensions are controlled by the browser settings.
 

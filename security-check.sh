@@ -20,7 +20,16 @@ check() {  # check <label> <regex>  → fails if the regex matches anywhere in t
 echo "Checking $FILE"
 [ -f "$FILE" ] || { echo "FAIL  file not found"; exit 1; }
 
-check "no http(s):// URLs"                      'https?://'
+# Exactly one external address is permitted: a plain <a> link to the project's releases page
+# (opened only on click – the browser never loads it on its own). Every other https?:// occurrence fails.
+REL='https://github.com/BacharGroup/LocalPictureGallery/releases/latest'
+n_rel=$(grep -oF "href=\"$REL\"" "$FILE" | wc -l)
+n_url=$(grep -oE 'https?://' "$FILE" | wc -l)
+if [ "$n_url" = "1" ] && [ "$n_rel" = "1" ] && grep -qE "<a [^>]*href=\"$REL\"[^>]*rel=\"noopener noreferrer\"" "$FILE"; then
+  echo "PASS  no http(s):// URLs except the single releases link (<a>, noopener)"
+else
+  echo "FAIL  http(s):// URLs: found $n_url (expected exactly 1: the releases link as an <a> with rel=\"noopener noreferrer\")"; grep -noE 'https?://[^"'"'"' <>]*' "$FILE" | sed 's/^/      /'; fail=1
+fi
 check "no external scripts / stylesheets"       '<script[^>]*\bsrc=|<link[^>]*rel="(stylesheet|preload|prefetch|modulepreload)"|<link[^>]*href="(https?:)?//'
 check "no iframes / embeds / objects"           '<(iframe|embed|object)\b'
 check "no fetch / XHR / WebSocket / beacon"     '\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|EventSource)\b'
@@ -38,6 +47,11 @@ if [ -n "$ext" ]; then echo "FAIL  img/link sources must be inline data: or icon
 else echo "PASS  img/link sources are inline or icons/ only"; fi
 if [ -n "$srcs" ]; then echo "FAIL  img.src assignments must use blob URLs only"; echo "$srcs" | sed 's/^/      /'; fail=1
 else echo "PASS  image sources are blob: URLs only"; fi
+
+# No other links: <a href> other than the releases link must not exist
+others=$(grep -oE '<a [^>]*href="[^"]*"' "$FILE" | grep -vF "href=\"$REL\"" || true)
+if [ -n "$others" ]; then echo "FAIL  unexpected <a href> links"; echo "$others" | sed 's/^/      /'; fail=1
+else echo "PASS  no <a href> links other than the releases link"; fi
 
 # Single-file: exactly one <script>, exactly one <style>, both inline
 ns=$(grep -c '<script' "$FILE"); nst=$(grep -c '<style' "$FILE")
