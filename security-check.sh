@@ -20,16 +20,25 @@ check() {  # check <label> <regex>  → fails if the regex matches anywhere in t
 echo "Checking $FILE"
 [ -f "$FILE" ] || { echo "FAIL  file not found"; exit 1; }
 
-# Exactly one external address is permitted: a plain <a> link to the project's releases page
-# (opened only on click – the browser never loads it on its own). Every other https?:// occurrence fails.
+# External addresses: an explicit allow-list of exactly TWO, each pinned to its tag, purpose and exact value.
+#   1. the releases link   – a plain <a>, followed only when the user clicks it
+#   2. the og:image preview – a <meta> read by link-preview servers when someone shares the address; browsers ignore it
+# Any other https?:// anywhere in the file fails. (The runtime check separately proves the page makes 0 requests.)
 REL='https://github.com/BacharGroup/LocalPictureGallery/releases/latest'
-n_rel=$(grep -oF "href=\"$REL\"" "$FILE" | wc -l)
+OGI='https://bachargroup.github.io/LocalPictureGallery/icons/icon-512.png'
 n_url=$(grep -oE 'https?://' "$FILE" | wc -l)
-if [ "$n_url" = "1" ] && [ "$n_rel" = "1" ] && grep -qE "<a [^>]*href=\"$REL\"[^>]*rel=\"noopener noreferrer\"" "$FILE"; then
-  echo "PASS  no http(s):// URLs except the single releases link (<a>, noopener)"
+n_rel=$(grep -cE "<a [^>]*href=\"$REL\"[^>]*rel=\"noopener noreferrer\"" "$FILE")
+n_ogi=$(grep -cE "<meta property=\"og:image\" content=\"$OGI\">" "$FILE")
+if [ "$n_url" = "2" ] && [ "$n_rel" = "1" ] && [ "$n_ogi" = "1" ]; then
+  echo "PASS  external addresses: exactly the two allowed (releases <a> link, og:image <meta>)"
 else
-  echo "FAIL  http(s):// URLs: found $n_url (expected exactly 1: the releases link as an <a> with rel=\"noopener noreferrer\")"; grep -noE 'https?://[^"'"'"' <>]*' "$FILE" | sed 's/^/      /'; fail=1
+  echo "FAIL  external addresses: found $n_url https?:// (allowed exactly 2: releases <a> with noopener = $n_rel, og:image meta = $n_ogi)"; grep -noE 'https?://[^"'"'"' <>]*' "$FILE" | sed 's/^/      /'; fail=1
 fi
+# og: / twitter: meta tags may carry text only – no address other than the one og:image above
+ogx=$(grep -oE '<meta (property|name)="(og|twitter):[^"]*" content="[^"]*"' "$FILE" | grep -vF "content=\"$OGI\"" | grep -E 'https?://|//' || true)
+if [ -n "$ogx" ]; then echo "FAIL  preview meta tags must not carry other addresses"; echo "$ogx" | sed 's/^/      /'; fail=1
+else echo "PASS  preview meta tags carry no other addresses"; fi
+
 check "no external scripts / stylesheets"       '<script[^>]*\bsrc=|<link[^>]*rel="(stylesheet|preload|prefetch|modulepreload)"|<link[^>]*href="(https?:)?//'
 check "no iframes / embeds / objects"           '<(iframe|embed|object)\b'
 check "no fetch / XHR / WebSocket / beacon"     '\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|EventSource)\b'

@@ -1,7 +1,6 @@
-name: Security and regression checks
+name: Security check
 
-# Runs the no-network / no-storage verification on every change,
-# every pull request, and every published release.
+# Verifies that LocalPictureGallery.html cannot talk to a network or persist data, on every change and release.
 on:
   push:
     branches: [ main ]
@@ -15,33 +14,19 @@ permissions:
   contents: read
 
 jobs:
-  verify:
-    name: Verify LocalPictureGallery.html is self-contained and nothing regressed
+  security:
+    name: No network, no storage, single file
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Static checks (no network, no storage, single file)
+      - name: Static checks (allow-listed addresses, no scripts/fetch/storage, single file)
         run: bash security-check.sh LocalPictureGallery.html
-
-      - name: Version stamps match (VERSION / header comment / meta)
-        run: |
-          v1=$(grep -oE "const VERSION = '[0-9]+\.[0-9]+\.[0-9]+'" LocalPictureGallery.html | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          v2=$(grep -oE '<!-- LocalPictureGallery v[0-9]+\.[0-9]+\.[0-9]+ -->' LocalPictureGallery.html | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          v3=$(grep -oE '<meta name="version" content="[0-9]+\.[0-9]+\.[0-9]+"' LocalPictureGallery.html | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          echo "VERSION=$v1  header=$v2  meta=$v3"
-          [ -n "$v1" ] && [ "$v1" = "$v2" ] && [ "$v1" = "$v3" ] || { echo "version stamps differ"; exit 1; }
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            [ "${GITHUB_REF_NAME}" = "v$v1" ] || { echo "tag ${GITHUB_REF_NAME} does not match file version v$v1"; exit 1; }
-          fi
 
       - name: Runtime check – page loads and makes zero network requests
         run: |
           npm install --silent --no-audit --no-fund jsdom
           node runtime-check.js LocalPictureGallery.html
-
-      - name: Regression tests – every behaviour built or fixed in an earlier version still works
-        run: node regression-check.js LocalPictureGallery.html
 
       - name: Repository contains the tool only (no images committed, app icons excepted)
         run: |

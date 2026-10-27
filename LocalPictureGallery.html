@@ -1,12 +1,21 @@
 <!doctype html>
-<!-- LocalPictureGallery v1.4.0 -->
+<!-- LocalPictureGallery v1.5.0 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="application-name" content="LocalPictureGallery">
-<meta name="version" content="1.4.0">
+<meta name="version" content="1.5.0">
 <title>LocalPictureGallery</title>
+<!-- Link-preview tags (WhatsApp, Telegram, LinkedIn…). Read by the sharing service when a link is shared – never by the
+     browser that opens this page. og:image is the second and last external address in this file; the security check pins both. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="LocalPictureGallery">
+<meta property="og:description" content="Local, single-file picture gallery – folder view, filter, rename. No server, no network, nothing leaves your device.">
+<meta property="og:image" content="https://bachargroup.github.io/LocalPictureGallery/icons/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta name="twitter:card" content="summary">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
@@ -147,7 +156,7 @@
 
 <script>
 (() => {
-  const VERSION = '1.4.0';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
+  const VERSION = '1.5.0';   // keep in sync with the header comment, <meta name="version"> and the Git tag (README §7)
 
   // ===================== Languages =====================
   // Default = device/browser language. Hebrew → Hebrew, Arabic → Arabic, anything else → English unless that language exists here.

@@ -104,6 +104,10 @@ const NAMES = ['IMG-20261025-947911764.jpg', 'IMG-20261025-952921765.jpg', 'IMG-
   await test('1.3.0', 'Logo is inline (data: URI) and sits in the title block', () => { const p = page(); const img = p.d.querySelector('.brand .title img.logo'); if (!img) throw new Error('no logo'); if (!img.src.startsWith('data:image/png;base64,')) throw new Error('not inline'); });
   await test('1.3.0', 'Favicon is inline; apple-touch-icon points into icons/', () => { const p = page(); if (!p.d.querySelector('link[rel=icon]').href.startsWith('data:image/png;base64,')) throw new Error('favicon not inline'); if (!/icons\/icon-180\.png$/.test(p.d.querySelector('link[rel=apple-touch-icon]').href)) throw new Error('apple-touch-icon'); });
 
+  // ===== v1.5.0 – link-preview tags =====
+  await test('1.5.0', 'Open Graph preview tags exist and og:image points at the hosted 512 icon', () => { const p = page(); const og = n => p.d.querySelector(`meta[property="og:${n}"]`)?.content; eq(og('title'), 'LocalPictureGallery'); if (!og('description')) throw new Error('no description'); eq(og('image'), 'https://bachargroup.github.io/LocalPictureGallery/icons/icon-512.png'); });
+  await test('1.5.0', 'Header logo is still inline (data:), not the hosted icon', () => { const p = page(); if (!p.d.querySelector('.brand .title img.logo').src.startsWith('data:')) throw new Error('logo not inline'); });
+
   // ===== v1.3.1 – update link =====
   await test('1.3.1', 'Version number is a link to the latest release, opened safely', () => { const p = page(); const a = p.$('ver'); eq(a.tagName, 'A'); eq(a.href, 'https://github.com/BacharGroup/LocalPictureGallery/releases/latest'); eq(a.target, '_blank'); eq(a.rel, 'noopener noreferrer'); });
   await test('1.3.1', 'It is the only link in the page', () => { const p = page(); eq(p.d.querySelectorAll('a[href]').length, 1); });

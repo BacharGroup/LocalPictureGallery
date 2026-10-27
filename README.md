@@ -4,7 +4,8 @@
 
 <a name="he"></a>עברית · [English](#english)
 
-[![Security and regression checks](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Regression tests](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/regression-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/regression-check.yml)
 [![Latest release](https://img.shields.io/github/v/release/BacharGroup/LocalPictureGallery?label=version&color=2ea44f)](https://github.com/BacharGroup/LocalPictureGallery/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -58,15 +59,15 @@
 
 ## אבטחה ופרטיות
 
-**שום מידע לא יוצא מהמכשיר.** לקובץ אין קוד רשת: אין סקריפטים חיצוניים, אין `fetch`, אין אחסון מקומי. הכתובת היחידה בקובץ היא קישור רגיל לעמוד הגרסאות ב-GitHub, שהדפדפן לא טוען בעצמו – רק אם לוחצים עליו. התמונות נטענות לזיכרון הדפדפן ומשוחררות ברענון; הדף לא זוכר דבר בין הפעלות.
+**שום מידע לא יוצא מהמכשיר.** לקובץ אין קוד רשת: אין סקריפטים חיצוניים, אין `fetch`, אין אחסון מקומי. יש בו בדיוק שתי כתובות, ושתיהן מהסוג שהדפדפן לא טוען בעצמו: קישור רגיל לעמוד הגרסאות ב-GitHub (נפתח רק בלחיצה), ותגית `og:image` לתמונת תצוגה מקדימה – אותה קורא רק השרת של WhatsApp/טלגרם וכדומה ברגע שמישהו משתף את הקישור, לא הדפדפן של מי שפותח את הדף. התמונות נטענות לזיכרון הדפדפן ומשוחררות ברענון; הדף לא זוכר דבר בין הפעלות.
 
 **חיפוש קולי** משתמש בזיהוי הדיבור של הדפדפן **במצב מקומי בלבד** (`processLocally: true`). אם הדפדפן לא יכול לזהות דיבור במכשיר, הכפתור לא מוצג – אין מסלול לענן. בפעם הראשונה Chrome מוריד חבילת שפה; זו הורדה של הדפדפן, לא של הקובץ.
 
-**אימות אוטומטי.** התג **Security check** למעלה משקף ריצה חיה ב־GitHub על כל שינוי וכל גרסה, ולחיצה עליו פותחת את הלוג. הבדיקות (`security-check.sh`, `runtime-check.js`) מאמתות: אין כתובות או משאבים חיצוניים מלבד הקישור הזה, אפס קריאות רשת ואחסון, אפס `eval`, מקורות תמונה `blob:` בלבד, קובץ יחיד, 0 בקשות רשת בטעינה בדפדפן ללא ממשק, והתאמה בין מספר הגרסה בקובץ לתג ב־Git.
+**אימות אוטומטי.** שני התגים למעלה משקפים שתי ריצות נפרדות ב־GitHub על כל שינוי וכל גרסה – **Security check** (אבטחה) ו-**Regression tests** (בדיקות נסיגה) – כך שכישלון מצביע מיד על התחום שלו; לחיצה על תג פותחת את הלוג שלו. בדיקות האבטחה (`security-check.sh`, `runtime-check.js`) מאמתות: אין כתובות חיצוניות מלבד השתיים שברשימה המותרת (כל אחת נעולה לתגית ולערך המדויק שלה), אפס קריאות רשת ואחסון, אפס `eval`, מקורות תמונה `blob:` בלבד, קובץ יחיד, 0 בקשות רשת בטעינה בדפדפן ללא ממשק, והתאמה בין מספר הגרסה בקובץ לתג ב־Git.
 
-**בדיקות נסיגה (regression).** כל יכולת שנבנתה, וכל תקלה שדווחה ותוקנה, מתועדת כבדיקה ב-`regression-check.js` – כ-60 בדיקות שמריצות את הדף בדפדפן ללא ממשק ומפעילות אותו כמשתמש: זיהוי שפה, סינון, חיפוש מספרי מדויק, התאמת שמות עברית⇄אנגלית, תפריט השפות, המרת מספרים מדוברים, מצב המיקרופון, הלוגו, קישור הגרסה, התצוגה המוגדלת. כל בדיקה נושאת את מספר הגרסה שבה נוספה או תוקנה (60 בדיקות נכון ל-1.4.0). הן רצות באותו workflow ובאותו תג – גרסה שמקלקלת משהו שכבר עבד לא תקבל ✓.
+**בדיקות נסיגה (regression).** כל יכולת שנבנתה, וכל תקלה שדווחה ותוקנה, מתועדת כבדיקה ב-`regression-check.js` – כ-62 בדיקות שמריצות את הדף בדפדפן ללא ממשק ומפעילות אותו כמשתמש: זיהוי שפה, סינון, חיפוש מספרי מדויק, התאמת שמות עברית⇄אנגלית, תפריט השפות, המרת מספרים מדוברים, מצב המיקרופון, הלוגו, קישור הגרסה, התצוגה המוגדלת. כל בדיקה נושאת את מספר הגרסה שבה נוספה או תוקנה (62 בדיקות נכון ל-1.5.0). הן רצות כ-workflow נפרד עם תג משלו – גרסה שמקלקלת משהו שכבר עבד לא תקבל ✓.
 
-**לבדוק בעצמך:** F12 ← Network ← בוחרים תיקייה ומשנים שם – הרשימה נשארת ריקה. בעורך טקסט, חיפוש `https` מוצא תוצאה אחת בלבד – הקישור לגרסאות. או: מנתקים את האינטרנט; הכול עובד זהה.
+**לבדוק בעצמך:** F12 ← Network ← בוחרים תיקייה ומשנים שם – הרשימה נשארת ריקה. בעורך טקסט, חיפוש `https` מוצא בדיוק שתי תוצאות – הקישור לגרסאות ותמונת התצוגה המקדימה. או: מנתקים את האינטרנט; הכול עובד זהה.
 
 מה שהבדיקה לא מכסה: באגים (היא בודקת רק מה הקובץ *לא יכול* לעשות), והדפדפן עצמו – Safe Browsing, סנכרון ותוספים נשלטים בהגדרות הדפדפן.
 
@@ -98,7 +99,8 @@ MIT – ראה [LICENSE](LICENSE). מותר להשתמש, להעתיק ולשנ�
 
 [עברית](#he) · English
 
-[![Security and regression checks](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Regression tests](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/regression-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/regression-check.yml)
 [![Latest release](https://img.shields.io/github/v/release/BacharGroup/LocalPictureGallery?label=version&color=2ea44f)](https://github.com/BacharGroup/LocalPictureGallery/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -152,15 +154,15 @@ No installation, no operating-system permissions, no internet needed.
 
 ## Security and privacy
 
-**No data leaves the device.** The file has no network code: no external scripts, no `fetch`, no local storage. The only address in the file is a plain link to the releases page on GitHub, which the browser never loads by itself – only if you click it. Images are loaded into browser memory and released on refresh; the page remembers nothing between sessions.
+**No data leaves the device.** The file has no network code: no external scripts, no `fetch`, no local storage. It contains exactly two addresses, both of a kind the browser never loads by itself: a plain link to the releases page on GitHub (followed only when clicked), and an `og:image` tag for a link preview – read only by the WhatsApp/Telegram-type server at the moment someone shares the link, never by the browser of whoever opens the page. Images are loaded into browser memory and released on refresh; the page remembers nothing between sessions.
 
 **Voice search** uses the browser's speech recognition **in on-device mode only** (`processLocally: true`). If the browser cannot recognise speech on the device, the button is not shown – there is no cloud path. The first time, Chrome downloads a language pack; that is the browser's download, not the file's.
 
-**Automated verification.** The **Security check** badge above reflects a live run on GitHub for every change and every release; clicking it opens the log. The checks (`security-check.sh`, `runtime-check.js`) verify: no addresses or external resources other than that one link, zero network and storage calls, zero `eval`, `blob:` image sources only, a single file, 0 network requests when loaded in a headless browser, and that the version number in the file matches the Git tag.
+**Automated verification.** The two badges above reflect two separate runs on GitHub for every change and every release – **Security check** and **Regression tests** – so a failure points straight at its area; clicking a badge opens its log. The security checks (`security-check.sh`, `runtime-check.js`) verify: no external addresses other than the two on the allow-list (each pinned to its exact tag and value), zero network and storage calls, zero `eval`, `blob:` image sources only, a single file, 0 network requests when loaded in a headless browser, and that the version number in the file matches the Git tag.
 
-**Regression tests.** Every capability that was built, and every reported bug that was fixed, is recorded as a test in `regression-check.js` – about 60 tests that load the page in a headless browser and drive it like a user: language detection, filtering, exact numeric search, Hebrew⇄English name matching, the language menu, spoken-number conversion, microphone state, logo, version link, lightbox. Each test carries the version in which it was added or fixed (60 tests as of 1.4.0). They run in the same workflow under the same badge – a release that breaks something that already worked does not get a ✓.
+**Regression tests.** Every capability that was built, and every reported bug that was fixed, is recorded as a test in `regression-check.js` – about 62 tests that load the page in a headless browser and drive it like a user: language detection, filtering, exact numeric search, Hebrew⇄English name matching, the language menu, spoken-number conversion, microphone state, logo, version link, lightbox. Each test carries the version in which it was added or fixed (62 tests as of 1.5.0). They run as their own workflow with their own badge – a release that breaks something that already worked does not get a ✓.
 
-**Check for yourself:** F12 → Network → choose a folder and rename a file – the list stays empty. In a text editor, searching `https` finds exactly one result – the releases link. Or disconnect the internet; everything works the same.
+**Check for yourself:** F12 → Network → choose a folder and rename a file – the list stays empty. In a text editor, searching `https` finds exactly two results – the releases link and the preview image. Or disconnect the internet; everything works the same.
 
 What the check does not cover: bugs (it only verifies what the file *cannot* do), and the browser itself – Safe Browsing, sync and extensions are controlled by the browser settings.
 
