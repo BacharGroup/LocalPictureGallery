@@ -4,7 +4,7 @@
 
 <a name="he"></a>עברית · [English](#english)
 
-[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Security and regression checks](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
 [![Latest release](https://img.shields.io/github/v/release/BacharGroup/LocalPictureGallery?label=version&color=2ea44f)](https://github.com/BacharGroup/LocalPictureGallery/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -38,7 +38,7 @@
 6. **תצוגה מוגדלת** – לחיצה על תמונה. ניווט: חיצים, מקשי ← →, החלקה. סגירה: ✕, Esc, או לחיצה על הרקע.
 7. **שינוי שם** – בתצוגה המוגדלת, שורת **File name** ← שם חדש ← **Save**. הסיומת קבועה. השינוי נעשה בדיסק מיד.
 8. **עדכון** – לחיצה על מספר הגרסה בפינה (`v1.x.y`) פותחת את עמוד הגרסה האחרונה ב-GitHub. זה הקישור היחיד בקובץ, והוא נפתח רק בלחיצה.
-9. **שפה** – בורר עם דגל בפינה השמאלית. ברירת המחדל היא שפת המכשיר (עברית או אנגלית). הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
+9. **שפה** – בורר עם דגל בפינה השמאלית: עברית, אנגלית, ערבית. ברירת המחדל היא שפת המכשיר. הבחירה תקפה ללשונית הנוכחית; לשפה קבועה מוסיפים `#lang=he` או `#lang=en` לכתובת (עובד גם בסימנייה).
 
 **בלי Chrome/Edge או בטלפון:** **בחר קבצים** ← מסמנים תמונות. צפייה בלבד.
 
@@ -64,6 +64,8 @@
 
 **אימות אוטומטי.** התג **Security check** למעלה משקף ריצה חיה ב־GitHub על כל שינוי וכל גרסה, ולחיצה עליו פותחת את הלוג. הבדיקות (`security-check.sh`, `runtime-check.js`) מאמתות: אין כתובות או משאבים חיצוניים מלבד הקישור הזה, אפס קריאות רשת ואחסון, אפס `eval`, מקורות תמונה `blob:` בלבד, קובץ יחיד, 0 בקשות רשת בטעינה בדפדפן ללא ממשק, והתאמה בין מספר הגרסה בקובץ לתג ב־Git.
 
+**בדיקות נסיגה (regression).** כל יכולת שנבנתה, וכל תקלה שדווחה ותוקנה, מתועדת כבדיקה ב-`regression-check.js` – כ-60 בדיקות שמריצות את הדף בדפדפן ללא ממשק ומפעילות אותו כמשתמש: זיהוי שפה, סינון, חיפוש מספרי מדויק, התאמת שמות עברית⇄אנגלית, תפריט השפות, המרת מספרים מדוברים, מצב המיקרופון, הלוגו, קישור הגרסה, התצוגה המוגדלת. כל בדיקה נושאת את מספר הגרסה שבה נוספה או תוקנה (60 בדיקות נכון ל-1.4.0). הן רצות באותו workflow ובאותו תג – גרסה שמקלקלת משהו שכבר עבד לא תקבל ✓.
+
 **לבדוק בעצמך:** F12 ← Network ← בוחרים תיקייה ומשנים שם – הרשימה נשארת ריקה. בעורך טקסט, חיפוש `https` מוצא תוצאה אחת בלבד – הקישור לגרסאות. או: מנתקים את האינטרנט; הכול עובד זהה.
 
 מה שהבדיקה לא מכסה: באגים (היא בודקת רק מה הקובץ *לא יכול* לעשות), והדפדפן עצמו – Safe Browsing, סנכרון ותוספים נשלטים בהגדרות הדפדפן.
@@ -76,7 +78,8 @@
 - **אין ביטול** לשינוי שם; משנים חזרה.
 - **שינוי אותיות גדולות/קטנות בלבד** נחסם ב־Windows וב־macOS ("כבר קיים").
 - **HEIC/HEIF** (צילומי iPhone) לא מוצגים. נתמכים: jpg, png, gif, webp, bmp, avif.
-- **ההתאמה עברית⇄אנגלית מקורבת** – שמות דומים עלולים להיתפס יחד. חיפוש בכתב של שם הקובץ תמיד מדויק.
+- **חיפוש קולי בעברית ובערבית לא זמין כרגע.** זיהוי הדיבור במכשיר של Chrome תומך ב-17 שפות, ועברית וערבית אינן ביניהן. כשאין חבילה מקומית לשפה, כפתור המיקרופון מוצג מעומעם עם הסבר – הקובץ לא עובר לזיהוי בענן, כדי ששום קול לא יישלח החוצה. באנגלית זה עובד.
+- **ההתאמה עברית⇄אנגלית מקורבת** – שמות דומים עלולים להיתפס יחד. חיפוש בכתב של שם הקובץ תמיד מדויק. שמות בערבית מחופשים כפי שהם (אין תעתיק ערבית⇄עברית/אנגלית).
 - **הרשאה ושפה לא נשמרות** בין הפעלות – בכוונה, כדי שלא יהיה אחסון. לשפה קבועה: `#lang=xx` בכתובת.
 
 ---
@@ -95,7 +98,7 @@ MIT – ראה [LICENSE](LICENSE). מותר להשתמש, להעתיק ולשנ�
 
 [עברית](#he) · English
 
-[![Security check](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
+[![Security and regression checks](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml/badge.svg)](https://github.com/BacharGroup/LocalPictureGallery/actions/workflows/security-check.yml)
 [![Latest release](https://img.shields.io/github/v/release/BacharGroup/LocalPictureGallery?label=version&color=2ea44f)](https://github.com/BacharGroup/LocalPictureGallery/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -129,7 +132,7 @@ Renaming and voice search rely on capabilities that currently exist only in Chro
 6. **Full-size view** – click an image. Navigate: arrows, ← → keys, swipe. Close: ✕, Esc, or click the background.
 7. **Rename** – in the full-size view, the **File name** row → new name → **Save**. The extension is fixed. The change is written to disk immediately.
 8. **Update** – clicking the version number in the corner (`v1.x.y`) opens the latest release page on GitHub. It is the only link in the file, and it opens only when clicked.
-9. **Language** – picker with a flag at the top-left. The default is the device language (Hebrew or English). The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
+9. **Language** – picker with a flag at the top-left: Hebrew, English, Arabic. The default is the device language. The choice applies to the current tab; for a fixed language add `#lang=he` or `#lang=en` to the address (works in a bookmark too).
 
 **Without Chrome/Edge, or on a phone:** **Choose files** → select images. View only.
 
@@ -155,6 +158,8 @@ No installation, no operating-system permissions, no internet needed.
 
 **Automated verification.** The **Security check** badge above reflects a live run on GitHub for every change and every release; clicking it opens the log. The checks (`security-check.sh`, `runtime-check.js`) verify: no addresses or external resources other than that one link, zero network and storage calls, zero `eval`, `blob:` image sources only, a single file, 0 network requests when loaded in a headless browser, and that the version number in the file matches the Git tag.
 
+**Regression tests.** Every capability that was built, and every reported bug that was fixed, is recorded as a test in `regression-check.js` – about 60 tests that load the page in a headless browser and drive it like a user: language detection, filtering, exact numeric search, Hebrew⇄English name matching, the language menu, spoken-number conversion, microphone state, logo, version link, lightbox. Each test carries the version in which it was added or fixed (60 tests as of 1.4.0). They run in the same workflow under the same badge – a release that breaks something that already worked does not get a ✓.
+
 **Check for yourself:** F12 → Network → choose a folder and rename a file – the list stays empty. In a text editor, searching `https` finds exactly one result – the releases link. Or disconnect the internet; everything works the same.
 
 What the check does not cover: bugs (it only verifies what the file *cannot* do), and the browser itself – Safe Browsing, sync and extensions are controlled by the browser settings.
@@ -167,7 +172,8 @@ What the check does not cover: bugs (it only verifies what the file *cannot* do)
 - **No undo** for a rename; rename back.
 - **Changing letter case only** is blocked on Windows and macOS ("already exists").
 - **HEIC/HEIF** (iPhone photos) are not shown. Supported: jpg, png, gif, webp, bmp, avif.
-- **Hebrew⇄English matching is approximate** – similar names may be caught together. Searching in the file name's own script is always exact.
+- **Voice search in Hebrew and Arabic is not available yet.** Chrome's on-device speech recognition supports 17 languages, and Hebrew and Arabic are not among them. When a language has no local pack, the microphone button is shown greyed out with an explanation – the file never falls back to cloud recognition, so no audio is sent anywhere. English works.
+- **Hebrew⇄English matching is approximate** – similar names may be caught together. Searching in the file name's own script is always exact. Arabic names are searched as written (no Arabic⇄Hebrew/English transliteration).
 - **Permission and language are not kept** between sessions – deliberately, so there is no storage. For a fixed language: `#lang=xx` in the address.
 
 ---

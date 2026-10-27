@@ -1,4 +1,4 @@
-name: Security check
+name: Security and regression checks
 
 # Runs the no-network / no-storage verification on every change,
 # every pull request, and every published release.
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify LocalPictureGallery.html is self-contained
+    name: Verify LocalPictureGallery.html is self-contained and nothing regressed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +39,9 @@ jobs:
         run: |
           npm install --silent --no-audit --no-fund jsdom
           node runtime-check.js LocalPictureGallery.html
+
+      - name: Regression tests – every behaviour built or fixed in an earlier version still works
+        run: node regression-check.js LocalPictureGallery.html
 
       - name: Repository contains the tool only (no images committed, app icons excepted)
         run: |
